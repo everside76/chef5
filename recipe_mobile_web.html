@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>저녁 준비 모바일 플래너</title>
-  <meta name="description" content="저녁 메뉴, 장보기, 조리 순서를 모바일에서 확인하고 체크하는 설치형 웹앱입니다." />
+  <title>Recipe Planner</title>
+  <meta name="description" content="오늘의 메뉴, 장보기, 조리 순서를 모바일에서 확인하고 체크하는 설치형 웹앱입니다." />
   <meta name="theme-color" content="#f3f2fb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="저녁 플래너" />
+  <meta name="apple-mobile-web-app-title" content="Recipe Planner" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png" />
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" />
@@ -127,25 +127,38 @@
     .brand-pill {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 6px 12px 6px 6px;
+      gap: 10px;
+      padding: 6px 15px 6px 6px;
       border-radius: 999px;
       background: var(--surface);
       box-shadow: var(--shadow-soft);
     }
 
-    .brand-pill img {
-      width: 30px;
-      height: 30px;
-      border-radius: 9px;
-      display: block;
-      object-fit: cover;
+    .brand-pill .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, #8574f2, #6c5ce7);
+      box-shadow: 0 8px 16px rgba(108, 92, 231, .32);
+      flex: 0 0 auto;
+    }
+
+    .brand-pill .logo svg { width: 20px; height: 20px; }
+
+    .brand-pill > div {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
     }
 
     .brand-pill b {
-      font-size: 12.5px;
-      font-weight: 800;
-      letter-spacing: -.01em;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: -.02em;
+      line-height: 1.1;
     }
 
     .brand-pill span {
@@ -153,7 +166,7 @@
       font-size: 10.5px;
       font-weight: 700;
       color: var(--accent);
-      margin-top: 1px;
+      line-height: 1.1;
     }
 
     .top-actions {
@@ -328,93 +341,86 @@
 
     /* ---------- recommend carousel ---------- */
     .carousel {
-      display: flex;
-      gap: 13px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      padding: 2px 2px 6px;
-      margin: 0 -18px;
-      padding-left: 18px;
-      padding-right: 18px;
-      scrollbar-width: none;
+      display: grid;
+      gap: 10px;
     }
 
-    .carousel::-webkit-scrollbar { display: none; }
-
     .hero-card {
-      scroll-snap-align: start;
-      flex: 0 0 78%;
       position: relative;
-      border-radius: var(--radius-lg);
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      align-items: stretch;
+      border-radius: var(--radius-md);
       overflow: hidden;
       background: var(--surface);
-      box-shadow: var(--shadow-card);
+      box-shadow: var(--shadow-soft);
       text-align: left;
       border: 0;
       padding: 0;
       color: var(--ink);
-      display: block;
     }
 
-    .hero-card:active { transform: scale(.985); }
+    .hero-card:active { transform: scale(.99); }
 
-    .hero-art {
-      height: 120px;
-      position: relative;
+    .hero-thumb {
       display: grid;
       place-items: center;
-      overflow: hidden;
+      color: rgba(27, 28, 48, .5);
     }
 
-    .hero-art svg.dish {
-      width: 78px;
-      height: 62px;
-      color: rgba(27, 28, 48, .42);
+    .hero-thumb svg.dish {
+      width: 48px;
+      height: 38px;
     }
 
     .hero-fav {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 34px;
-      height: 34px;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
       border: 0;
       border-radius: 50%;
-      background: rgba(255, 255, 255, .82);
-      backdrop-filter: blur(6px);
+      background: var(--surface-2);
       display: grid;
       place-items: center;
       color: var(--muted);
-      box-shadow: 0 6px 14px rgba(40, 34, 80, .14);
       z-index: 2;
     }
 
-    .hero-fav svg { width: 17px; height: 17px; }
+    .hero-fav svg { width: 16px; height: 16px; }
 
     .hero-fav.is-active {
       color: #fff;
       background: var(--amber);
-      fill: #fff;
     }
 
     .hero-fav.is-active svg { fill: #fff; }
 
-    .hero-body { padding: 13px 15px 15px; }
+    .hero-body { padding: 11px 46px 11px 13px; align-self: center; min-width: 0; }
 
     .hero-body h3 {
-      font-size: 15.5px;
+      font-size: 14.5px;
       font-weight: 850;
       line-height: 1.2;
       letter-spacing: -.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .hero-body p {
-      margin-top: 5px;
+      margin-top: 4px;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: 11.5px;
+      line-height: 1.35;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
+    .hero-body .meta-row { margin-top: 8px; }
 
     .meta-row {
       display: flex;
@@ -1171,9 +1177,9 @@
         <section id="view-home" class="view active" aria-label="홈">
           <div class="topbar">
             <div class="brand-pill">
-              <img src="./assets/icons/icon-192.png" alt="" />
+              <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 18h18"/><path d="M5 18a7 7 0 0 1 14 0"/><path d="M12 6.5V9"/><circle cx="12" cy="5" r="1.4"/></svg></span>
               <div>
-                <b>저녁 준비 플래너</b>
+                <b>Recipe Planner</b>
                 <span>오늘도 맛있게</span>
               </div>
             </div>
@@ -1184,8 +1190,8 @@
             </div>
           </div>
 
-          <p class="eyebrow">Dinner made easy</p>
-          <h1>오늘 저녁 준비,<br><span class="accent">무엇부터</span> 볼까요?</h1>
+          <p class="eyebrow">Cooking made easy</p>
+          <h1>오늘 요리 준비,<br><span class="accent">무엇부터</span> 볼까요?</h1>
           <p class="lead">필요한 재료와 조리 순서를 한 화면에서 확인하세요.</p>
 
           <div class="tiles">
@@ -1209,8 +1215,8 @@
 
           <div class="section-head">
             <div>
-              <h2>추천 레시피</h2>
-              <small id="recipeCount">즐겨찾기한 메뉴</small>
+              <h2>오늘의 레시피</h2>
+              <small id="recipeCount">오늘 요리할 메뉴</small>
             </div>
             <button class="view-all" type="button" data-view-jump="recipes">전체보기</button>
           </div>
@@ -1258,7 +1264,7 @@
         <section id="view-recipes" class="view" aria-label="레시피 목록">
           <div class="topbar">
             <div class="brand-pill">
-              <img src="./assets/icons/icon-192.png" alt="" />
+              <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 18h18"/><path d="M5 18a7 7 0 0 1 14 0"/><path d="M12 6.5V9"/><circle cx="12" cy="5" r="1.4"/></svg></span>
               <div>
                 <b>레시피 목록</b>
                 <span id="recipeLibraryCount">0개 메뉴</span>
@@ -1288,7 +1294,7 @@
         <section id="view-shopping" class="view" aria-label="장보기">
           <div class="topbar">
             <div class="brand-pill">
-              <img src="./assets/icons/icon-192.png" alt="" />
+              <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 18h18"/><path d="M5 18a7 7 0 0 1 14 0"/><path d="M12 6.5V9"/><circle cx="12" cy="5" r="1.4"/></svg></span>
               <div>
                 <b>장보기 체크</b>
                 <span id="shoppingSummary">-</span>
@@ -1322,7 +1328,7 @@
         <section id="view-timeline" class="view" aria-label="조리 순서">
           <div class="topbar">
             <div class="brand-pill">
-              <img src="./assets/icons/icon-192.png" alt="" />
+              <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 18h18"/><path d="M5 18a7 7 0 0 1 14 0"/><path d="M12 6.5V9"/><circle cx="12" cy="5" r="1.4"/></svg></span>
               <div>
                 <b>조리 타임라인</b>
                 <span>순서대로 준비</span>
@@ -1486,17 +1492,17 @@
     ];
 
     const timeline = [
-      ['전날 또는 오전', '삼겹살 밑간', '럽을 바르고 냉장고에서 4시간 이상 두면 간이 안정됩니다.'],
-      ['조리 7시간 전', '삼겹살 실온 복귀', '30분 정도 실온에 두고 오븐을 110~120도로 예열합니다.'],
-      ['조리 6시간 전', '삼겹살 1차 저온 조리', '오븐에서 3~4시간 천천히 익혀 속 온도를 올립니다.'],
-      ['조리 3시간 전', '포일 랩', '버터와 사과주스를 넣고 감싸 부드럽게 마무리합니다.'],
-      ['조리 2시간 전', '부야베스 베이스', '채소, 토마토, 와인, 오렌지 향으로 국물의 바탕을 만듭니다.'],
-      ['조리 90분 전', '로메스코 소스', '파프리카를 굽고 아몬드와 함께 갈아 둡니다.'],
-      ['조리 60분 전', '삼겹살 휴지', '고기를 꺼내 최소 40분 이상 쉬게 합니다.'],
-      ['조리 35분 전', '부야베스 완성', '감자, 생선, 조개, 새우 순서로 넣어 익힙니다.'],
-      ['조리 25분 전', '냉파스타', '면을 삶아 차갑게 식히고 소스와 버무립니다.'],
-      ['조리 10분 전', '감바스', '약불에서 마늘 향을 내고 새우를 짧게 익힙니다.'],
-      ['마지막', '삼겹살 고온 마무리', '겉면이 필요하면 220~230도에서 8~12분만 마무리합니다.']
+      ['전날 또는 오전', '삼겹살 밑간', '럽을 바르고 냉장고에서 4시간 이상 두면 간이 안정됩니다.', 'pork'],
+      ['조리 7시간 전', '삼겹살 실온 복귀', '30분 정도 실온에 두고 오븐을 110~120도로 예열합니다.', 'pork'],
+      ['조리 6시간 전', '삼겹살 1차 저온 조리', '오븐에서 3~4시간 천천히 익혀 속 온도를 올립니다.', 'pork'],
+      ['조리 3시간 전', '포일 랩', '버터와 사과주스를 넣고 감싸 부드럽게 마무리합니다.', 'pork'],
+      ['조리 2시간 전', '부야베스 베이스', '채소, 토마토, 와인, 오렌지 향으로 국물의 바탕을 만듭니다.', 'bouillabaisse'],
+      ['조리 90분 전', '로메스코 소스', '파프리카를 굽고 아몬드와 함께 갈아 둡니다.', 'romesco'],
+      ['조리 60분 전', '삼겹살 휴지', '고기를 꺼내 최소 40분 이상 쉬게 합니다.', 'pork'],
+      ['조리 35분 전', '부야베스 완성', '감자, 생선, 조개, 새우 순서로 넣어 익힙니다.', 'bouillabaisse'],
+      ['조리 25분 전', '냉파스타', '면을 삶아 차갑게 식히고 소스와 버무립니다.', 'pasta'],
+      ['조리 10분 전', '감바스', '약불에서 마늘 향을 내고 새우를 짧게 익힙니다.', 'gambas'],
+      ['마지막', '삼겹살 고온 마무리', '겉면이 필요하면 220~230도에서 8~12분만 마무리합니다.', 'pork']
     ];
 
     const stateKey = 'dinnerPlannerShoppingStateV2';
@@ -1582,6 +1588,7 @@
       renderRecipeCarousel();
       renderRecipeList();
       renderShopping();
+      renderTimeline();
       updateStats();
     }
 
@@ -1656,6 +1663,7 @@
       document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
       if (name === 'shopping') renderShopping();
       if (name === 'recipes') renderRecipeList();
+      if (name === 'timeline') renderTimeline();
       if (name === 'home') { renderRecipeCarousel(); updateStats(); }
       if (window.matchMedia('(max-width: 480px)').matches) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1677,6 +1685,21 @@
       return recipes.filter(isRecipeFavorite);
     }
 
+    function favoriteRecipeIdSet() {
+      return new Set(visibleFavoriteRecipes().map(recipe => recipe.id));
+    }
+
+    // 오늘의 레시피(체크된 메뉴)에 연결된 재료 + 특정 메뉴에 묶이지 않은 공용 재료만 장보기 대상으로 본다.
+    function isItemRelevant(item, favIds = favoriteRecipeIdSet()) {
+      const dishes = item.dishes || [];
+      return !dishes.length || dishes.some(dishId => favIds.has(dishId));
+    }
+
+    function relevantShoppingItems() {
+      const favIds = favoriteRecipeIdSet();
+      return shoppingItems.filter(item => isItemRelevant(item, favIds));
+    }
+
     function metaChips(recipe, kind = 'meta-chip') {
       const wrap = kind === 'meta-chip' ? 'meta-chip' : 'row-meta-item';
       return [
@@ -1695,22 +1718,20 @@
       el.innerHTML = visible.length
         ? visible.map((recipe, index) => `
           <button class="hero-card" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기">
-            <div class="hero-art" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">
-              ${dishArtFor(recipe, index)}
-              <span class="hero-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" role="button" tabindex="0"
-                onclick="event.stopPropagation(); toggleRecipeFavorite(${jsAttr(recipe.id)})"
-                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleRecipeFavorite(${jsAttr(recipe.id)});}"
-                aria-label="즐겨찾기 토글">${starIcon}</span>
-            </div>
+            <div class="hero-thumb" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">${dishArtFor(recipe, index)}</div>
             <div class="hero-body">
               <h3>${escapeHtml(recipe.title)}</h3>
               <p>${escapeHtml(recipe.short || recipe.desc || '')}</p>
               <div class="meta-row">${metaChips(recipe)}</div>
             </div>
+            <span class="hero-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" role="button" tabindex="0"
+              onclick="event.stopPropagation(); toggleRecipeFavorite(${jsAttr(recipe.id)})"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleRecipeFavorite(${jsAttr(recipe.id)});}"
+              aria-label="오늘의 레시피 체크">${starIcon}</span>
           </button>
         `).join('')
-        : '<div class="empty" style="flex:0 0 100%">즐겨찾기한 레시피가 없습니다. 레시피 목록에서 별표를 눌러 여기에 표시하세요.</div>';
-      document.getElementById('recipeCount').textContent = `즐겨찾기 ${visible.length}개 · 전체 ${recipes.length}개`;
+        : '<div class="empty">오늘의 레시피로 체크한 메뉴가 없습니다. 레시피 목록에서 별을 눌러 오늘 요리할 메뉴를 골라 주세요.</div>';
+      document.getElementById('recipeCount').textContent = `오늘의 레시피 ${visible.length}개 · 전체 ${recipes.length}개`;
     }
 
     /* ---------- recipe list ---------- */
@@ -1720,7 +1741,7 @@
       const favCount = visibleFavoriteRecipes().length;
       const filters = [
         ['all', `전체 ${recipes.length}`],
-        ['fav', `즐겨찾기 ${favCount}`],
+        ['fav', `오늘의 레시피 ${favCount}`],
         ['quick', '간단 요리'],
         ['slow', '정성 요리']
       ];
@@ -1770,7 +1791,7 @@
               </div>
             </div>
             <div class="row-side">
-              <button class="row-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 즐겨찾기 ${isRecipeFavorite(recipe) ? '해제' : '추가'}">${starIcon}</button>
+              <button class="row-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 오늘의 레시피 ${isRecipeFavorite(recipe) ? '해제' : '체크'}">${starIcon}</button>
               <span class="row-chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
             </div>
           </article>
@@ -2017,7 +2038,7 @@
             </div>
           </div>
           <div class="form-row">
-            <label class="check"><input type="checkbox" name="favorite" ${isRecipeFavorite(recipe) ? 'checked' : ''}>홈 화면 추천에 표시</label>
+            <label class="check"><input type="checkbox" name="favorite" ${isRecipeFavorite(recipe) ? 'checked' : ''}>오늘의 레시피로 체크 (오늘 요리할 메뉴)</label>
           </div>
           <div class="form-row">
             <label for="recipeDesc">상세 설명</label>
@@ -2162,7 +2183,10 @@
         <button class="chip ${activeFilter === id ? 'active' : ''}" type="button" onclick="activeFilter='${id}'; renderShopping();">${label}</button>
       `).join('');
 
-      const recipeFilters = [['all', '전체 메뉴'], ...recipes.map(recipe => [recipe.id, recipe.title])];
+      // 연결 레시피 칩은 오늘의 레시피(체크된 메뉴)로 제한한다.
+      const favorites = visibleFavoriteRecipes();
+      if (recipeFilter !== 'all' && !favorites.some(recipe => recipe.id === recipeFilter)) recipeFilter = 'all';
+      const recipeFilters = [['all', '전체 메뉴'], ...favorites.map(recipe => [recipe.id, recipe.title])];
       document.getElementById('recipeFilters').innerHTML = recipeFilters.map(([id, label]) => `
         <button class="chip ${recipeFilter === id ? 'active' : ''}" type="button" onclick="recipeFilter=${jsAttr(id)}; renderShopping();">${escapeHtml(label)}</button>
       `).join('');
@@ -2170,7 +2194,9 @@
 
     function filteredItems() {
       const query = document.getElementById('searchBox').value.trim().toLowerCase();
+      const favIds = favoriteRecipeIdSet();
       return shoppingItems.filter(item => {
+        if (!isItemRelevant(item, favIds)) return false;
         const itemState = getItemState(item.id);
         const text = `${item.cat} ${item.name} ${item.qty} ${item.use}`.toLowerCase();
         if (query && !text.includes(query)) return false;
@@ -2184,7 +2210,7 @@
 
     function renderCategoryBubbles() {
       const palette = ['#6c5ce7', '#2fc39b', '#ff9f43', '#ff7a90', '#3d7bf0', '#a06bd8'];
-      const counts = shoppingItems.reduce((map, item) => {
+      const counts = relevantShoppingItems().reduce((map, item) => {
         map[item.cat] = (map[item.cat] || 0) + 1;
         return map;
       }, {});
@@ -2247,11 +2273,12 @@
     }
 
     function updateStats() {
-      const total = shoppingItems.length || 1;
-      const owned = shoppingItems.filter(item => getItemState(item.id).owned).length;
-      const bought = shoppingItems.filter(item => getItemState(item.id).bought).length;
+      const relevant = relevantShoppingItems();
+      const total = relevant.length || 1;
+      const owned = relevant.filter(item => getItemState(item.id).owned).length;
+      const bought = relevant.filter(item => getItemState(item.id).bought).length;
       const done = owned + bought;
-      const need = shoppingItems.length - done;
+      const need = relevant.length - done;
       const pct = Math.round(done / total * 100);
 
       const summaryEl = document.getElementById('shoppingSummary');
@@ -2268,12 +2295,18 @@
     }
 
     function renderTimeline() {
-      document.getElementById('timeline').innerHTML = timeline.map(([time, title, desc]) => `
-        <article class="timeline-row">
-          <div class="time">${time}</div>
-          <div class="task"><strong>${title}</strong><span>${desc}</span></div>
-        </article>
-      `).join('');
+      const el = document.getElementById('timeline');
+      if (!el) return;
+      const favIds = favoriteRecipeIdSet();
+      const rows = timeline.filter(([, , , dish]) => !dish || favIds.has(dish));
+      el.innerHTML = rows.length
+        ? rows.map(([time, title, desc]) => `
+          <article class="timeline-row">
+            <div class="time">${time}</div>
+            <div class="task"><strong>${title}</strong><span>${desc}</span></div>
+          </article>
+        `).join('')
+        : '<div class="empty">오늘의 레시피로 체크한 메뉴가 없습니다. 레시피 목록에서 별을 눌러 오늘 요리할 메뉴를 골라 주세요.</div>';
     }
 
     document.querySelectorAll('.nav button').forEach(button => {
