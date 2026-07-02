@@ -1443,8 +1443,8 @@
         serving: '4인분',
         level: '중간',
         desc: '소금과 후추 중심의 드라이럽으로 오래 익혀 부드럽게 만드는 메인 요리입니다.',
-        ingredients: ['통삼겹살 1~1.2kg', '굵은 소금 12g', '굵게 간 후추 12g', '마늘가루 1작은술', '양파가루 1작은술', '훈제 파프리카가루 1작은술', '머스터드 1큰술', '무염버터 20g', '사과주스 3큰술'],
-        steps: ['고기 표면의 물기를 닦고 지방층에 얕게 칼집을 냅니다.', '머스터드를 얇게 바른 뒤 소금, 후추, 향신료를 고르게 묻힙니다.', '110~120도 오븐에서 3~4시간 1차 조리합니다.', '버터와 사과주스를 넣고 포일로 감싸 93~96도까지 익힙니다.', '40분 이상 휴지한 뒤 필요하면 고온에서 겉면만 짧게 마무리합니다.'],
+        ingredients: ['통삼겹살 1~1.2kg', '굵은 소금 12g', '굵게 간 후추 12g', '마늘가루 1작은술', '양파가루 1작은술', '훈제 파프리카가루 1작은술', '머스터드 1큰술', '무염버터 20g', '바비큐 소스 3큰술'],
+        steps: ['고기 표면의 물기를 닦고 지방층에 얕게 칼집을 냅니다.', '머스터드를 얇게 바른 뒤 소금, 후추, 향신료를 고르게 묻힙니다.', '110~120도 오븐에서 3~4시간 1차 조리합니다.', '버터와 바비큐 소스를 넣고 포일로 감싸 93~96도까지 익힙니다.', '40분 이상 휴지한 뒤 필요하면 고온에서 겉면만 짧게 마무리합니다.'],
         key: '온도계가 있으면 성공률이 크게 올라갑니다. 중심 온도보다 꼬치가 부드럽게 들어가는 상태를 함께 확인하세요.'
       },
       {
@@ -1542,7 +1542,7 @@
       ['전날 또는 오전', '삼겹살 밑간', '럽을 바르고 냉장고에서 4시간 이상 두면 간이 안정됩니다.', 'pork'],
       ['조리 7시간 전', '삼겹살 실온 복귀', '30분 정도 실온에 두고 오븐을 110~120도로 예열합니다.', 'pork'],
       ['조리 6시간 전', '삼겹살 1차 저온 조리', '오븐에서 3~4시간 천천히 익혀 속 온도를 올립니다.', 'pork'],
-      ['조리 3시간 전', '포일 랩', '버터와 사과주스를 넣고 감싸 부드럽게 마무리합니다.', 'pork'],
+      ['조리 3시간 전', '포일 랩', '버터와 바비큐 소스를 넣고 감싸 부드럽게 마무리합니다.', 'pork'],
       ['조리 2시간 전', '부야베스 베이스', '채소, 토마토, 와인, 오렌지 향으로 국물의 바탕을 만듭니다.', 'bouillabaisse'],
       ['조리 90분 전', '로메스코 소스', '파프리카를 굽고 아몬드와 함께 갈아 둡니다.', 'romesco'],
       ['조리 60분 전', '삼겹살 휴지', '고기를 꺼내 최소 40분 이상 쉬게 합니다.', 'pork'],
@@ -1630,6 +1630,22 @@
       await Promise.all(defaultRecipes.map(recipe => putInStore('recipes', { ...recipe, favorite: true })));
       await Promise.all(defaultShoppingItems.map(item => putInStore('shoppingItems', item)));
       await putInStore('meta', { key: 'seeded', value: true, seededAt: new Date().toISOString() });
+    }
+
+    // 기존에 저장된 텍사스 바비큐 레시피의 사과주스를 바비큐 소스로 교체한다.
+    // 원래 문구가 그대로 남아 있을 때만 치환하므로 여러 번 실행해도 안전하다.
+    async function runContentMigrations() {
+      const pork = await getFromStore('recipes', 'pork');
+      if (!pork) return false;
+      const next = {
+        ...pork,
+        ingredients: (pork.ingredients || []).map(line => line === '사과주스 3큰술' ? '바비큐 소스 3큰술' : line),
+        steps: (pork.steps || []).map(step => step.replace('버터와 사과주스를 넣고', '버터와 바비큐 소스를 넣고'))
+      };
+      if (JSON.stringify(next) === JSON.stringify(pork)) return false;
+      await putInStore('recipes', next);
+      await syncRecipeIngredients(next);
+      return true;
     }
 
     async function loadContent() {
@@ -2686,6 +2702,8 @@
         const data = snap.exists ? snap.data() : null;
         if (data && ((data.recipes && data.recipes.length) || (data.shoppingItems && data.shoppingItems.length))) {
           await applyRemote(data);
+          // 클라우드에 옛 데이터(사과주스)가 남아 있으면 치환 후 다시 올린다.
+          if (await runContentMigrations()) await refreshContent();
         } else {
           await pushToCloud();
         }
@@ -2727,6 +2745,7 @@
     async function initApp() {
       db = await openDatabase();
       await seedDatabaseIfNeeded();
+      await runContentMigrations();
       await loadContent();
       renderRecipeCarousel();
       renderRecipeList();
