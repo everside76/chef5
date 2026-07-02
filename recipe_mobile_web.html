@@ -1244,6 +1244,17 @@
             </button>
           </div>
 
+          <article class="utility-card" id="syncCard">
+            <h3 id="syncTitle">여러 기기에서 함께 쓰기</h3>
+            <p class="mini-line" id="syncDesc">구글 로그인하면 폰과 PC에서 레시피·장보기가 자동으로 동기화됩니다.</p>
+            <div class="utility-actions">
+              <button id="syncButton" class="pill-button" type="button" onclick="handleSyncClick()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3"/><path d="M21 3v5h-5"/><path d="M3 21v-5h5"/></svg>
+                구글로 로그인
+              </button>
+            </div>
+          </article>
+
           <article class="utility-card">
             <h3>홈 화면에 설치하고 더 편하게</h3>
             <p class="mini-line">보유 재료, 구매 완료, 타임라인이 이 기기에 저장됩니다.</p>
@@ -1385,7 +1396,20 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuOFy3ZxNNcc-qKgrPVS-trL8AZgiSfGY",
+      authDomain: "recipe-planner-5d636.firebaseapp.com",
+      projectId: "recipe-planner-5d636",
+      storageBucket: "recipe-planner-5d636.firebasestorage.app",
+      messagingSenderId: "733480743305",
+      appId: "1:733480743305:web:4be21574e5ade5a3223158",
+      measurementId: "G-LLWRPSPFLG"
+    };
+
     const defaultRecipes = [
       {
         id: 'pork',
@@ -1517,6 +1541,12 @@
     let deferredInstallPrompt = null;
     let wakeLock = null;
     let wakeLockWanted = false;
+    let fbAuth = null;
+    let fbDb = null;
+    let currentUser = null;
+    let cloudUnsub = null;
+    let pushTimer = null;
+    let applyingRemote = false;
 
     const dbName = 'dinnerPlannerContentDB';
     const dbVersion = 1;
@@ -1567,6 +1597,10 @@
       return storeRequest(storeName, 'readwrite', store => store.delete(key));
     }
 
+    function clearStore(storeName) {
+      return storeRequest(storeName, 'readwrite', store => store.clear());
+    }
+
     async function seedDatabaseIfNeeded() {
       const seeded = await getFromStore('meta', 'seeded');
       if (seeded?.value) return;
@@ -1590,6 +1624,7 @@
       renderShopping();
       renderTimeline();
       updateStats();
+      schedulePush();
     }
 
     function createId(prefix) {
@@ -1642,6 +1677,7 @@
 
     function saveState() {
       localStorage.setItem(stateKey, JSON.stringify(state));
+      schedulePush();
     }
 
     function getItemState(id) {
@@ -2348,6 +2384,147 @@
       }
     });
 
+    // ---------- Firebase 동기화 ----------
+    function firebaseAvailable() {
+      return typeof firebase !== 'undefined' && fbAuth && fbDb;
+    }
+
+    function userDocRef() {
+      return fbDb.collection('users').doc(currentUser.uid);
+    }
+
+    function updateSyncButton() {
+      const btn = document.getElementById('syncButton');
+      const title = document.getElementById('syncTitle');
+      const desc = document.getElementById('syncDesc');
+      if (!btn || !title || !desc) return;
+
+      if (typeof firebase === 'undefined' || !fbAuth) {
+        title.textContent = '기기 동기화';
+        desc.textContent = '지금은 오프라인이거나 동기화 서비스를 불러오지 못했습니다. 데이터는 이 기기에 안전하게 저장됩니다.';
+        btn.disabled = true;
+        btn.classList.add('secondary');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3"/><path d="M21 3v5h-5"/><path d="M3 21v-5h5"/></svg>동기화 사용 불가';
+        return;
+      }
+
+      btn.disabled = false;
+      if (currentUser) {
+        title.textContent = '동기화 켜짐';
+        desc.textContent = `${currentUser.email || '내 계정'} · 이 기기의 레시피·장보기가 클라우드와 동기화됩니다.`;
+        btn.classList.add('secondary');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>로그아웃';
+      } else {
+        title.textContent = '여러 기기에서 함께 쓰기';
+        desc.textContent = '구글 로그인하면 폰과 PC에서 레시피·장보기가 자동으로 동기화됩니다.';
+        btn.classList.remove('secondary');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3"/><path d="M21 3v5h-5"/><path d="M3 21v-5h5"/></svg>구글로 로그인';
+      }
+    }
+
+    async function handleSyncClick() {
+      if (!firebaseAvailable()) return;
+      if (currentUser) {
+        if (!confirm('로그아웃하면 이 기기에서는 클라우드 동기화가 멈춥니다. 지금까지 동기화된 데이터는 이 기기에 그대로 남습니다. 로그아웃할까요?')) return;
+        try { await fbAuth.signOut(); } catch (error) { console.warn('signOut 실패', error); }
+        return;
+      }
+      try {
+        await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      } catch (error) {
+        console.warn('로그인 실패', error);
+        if (error && (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request')) {
+          try { await fbAuth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); return; } catch (e) { console.warn(e); }
+        }
+        alert('구글 로그인에 실패했습니다.\n' + (error && (error.message || error.code) || ''));
+      }
+    }
+
+    function schedulePush() {
+      if (applyingRemote || !currentUser || !firebaseAvailable()) return;
+      clearTimeout(pushTimer);
+      pushTimer = setTimeout(pushToCloud, 800);
+    }
+
+    async function pushToCloud() {
+      if (!currentUser || !firebaseAvailable()) return;
+      try {
+        await userDocRef().set({
+          recipes,
+          shoppingItems,
+          state,
+          updatedAt: Date.now()
+        });
+      } catch (error) {
+        console.warn('클라우드 저장 실패', error);
+      }
+    }
+
+    async function applyRemote(data) {
+      if (!data) return;
+      applyingRemote = true;
+      try {
+        await clearStore('recipes');
+        await clearStore('shoppingItems');
+        await Promise.all((data.recipes || []).map(recipe => putInStore('recipes', recipe)));
+        await Promise.all((data.shoppingItems || []).map(item => putInStore('shoppingItems', item)));
+        Object.keys(state).forEach(key => delete state[key]);
+        Object.assign(state, data.state || {});
+        localStorage.setItem(stateKey, JSON.stringify(state));
+        await refreshContent();
+      } catch (error) {
+        console.warn('원격 데이터 반영 실패', error);
+      } finally {
+        applyingRemote = false;
+      }
+    }
+
+    async function onSignedIn(user) {
+      currentUser = user;
+      updateSyncButton();
+      try {
+        const snap = await userDocRef().get();
+        const data = snap.exists ? snap.data() : null;
+        if (data && ((data.recipes && data.recipes.length) || (data.shoppingItems && data.shoppingItems.length))) {
+          await applyRemote(data);
+        } else {
+          await pushToCloud();
+        }
+      } catch (error) {
+        console.warn('초기 동기화 실패', error);
+      }
+      cloudUnsub = userDocRef().onSnapshot(snap => {
+        if (!snap.exists || snap.metadata.hasPendingWrites) return;
+        applyRemote(snap.data());
+      }, error => console.warn('실시간 동기화 오류', error));
+    }
+
+    function onSignedOut() {
+      currentUser = null;
+      if (cloudUnsub) { cloudUnsub(); cloudUnsub = null; }
+      updateSyncButton();
+    }
+
+    function initFirebase() {
+      if (typeof firebase === 'undefined') {
+        updateSyncButton();
+        return;
+      }
+      try {
+        firebase.initializeApp(firebaseConfig);
+        fbAuth = firebase.auth();
+        fbDb = firebase.firestore();
+        updateSyncButton();
+        fbAuth.onAuthStateChanged(user => {
+          if (user) onSignedIn(user);
+          else onSignedOut();
+        });
+      } catch (error) {
+        console.warn('Firebase 초기화 실패', error);
+        updateSyncButton();
+      }
+    }
+
     async function initApp() {
       db = await openDatabase();
       await seedDatabaseIfNeeded();
@@ -2359,6 +2536,7 @@
       updateStats();
       updateInstallButton();
       updateWakeLockButton();
+      initFirebase();
     }
 
     initApp().catch(error => {

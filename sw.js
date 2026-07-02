@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chef5-dinner-planner-v19';
+const CACHE_NAME = 'chef5-dinner-planner-v20';
 const APP_SHELL = [
   './',
   './index.html',
@@ -29,6 +29,9 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
+  // Firebase 등 외부(cross-origin) 요청은 서비스워커가 가로채지 않는다.
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
