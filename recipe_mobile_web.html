@@ -1312,6 +1312,9 @@
               </div>
             </div>
             <div class="top-actions">
+              <button class="icon-button" type="button" aria-label="장보기 체크 초기화" onclick="resetShoppingChecks()">
+                <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/></svg>
+              </button>
               <button class="icon-button" type="button" aria-label="재료 추가" onclick="openShoppingEditor()">
                 <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
               </button>
@@ -2200,6 +2203,22 @@
       await putInStore('shoppingItems', item);
       closeEditor();
       await refreshContent();
+    }
+
+    function resetShoppingChecks() {
+      const checkedCount = shoppingItems.filter(item => {
+        const itemState = getItemState(item.id);
+        return itemState.owned || itemState.bought;
+      }).length;
+      if (!checkedCount) {
+        alert('초기화할 체크가 없습니다. 모든 재료가 이미 "필요" 상태입니다.');
+        return;
+      }
+      if (!confirm(`장보기 체크 ${checkedCount}개(집에 있음·구매 완료)를 모두 초기화할까요? 재료 목록은 그대로 유지됩니다.`)) return;
+      shoppingItems.forEach(item => { delete state[item.id]; });
+      saveState();
+      renderShopping();
+      updateStats();
     }
 
     async function deleteShoppingItem(id) {
