@@ -103,20 +103,6 @@
       margin-bottom: 26px;
     }
 
-    .brand-mark {
-      width: 22px;
-      height: 22px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2px;
-      transform: rotate(45deg);
-    }
-
-    .brand-mark span {
-      border-radius: 3px;
-      background: var(--ink);
-    }
-
     .icon-button {
       width: 34px;
       height: 34px;
@@ -236,6 +222,10 @@
       white-space: nowrap;
       box-shadow: 0 10px 20px rgba(15, 13, 11, .12);
       cursor: pointer;
+    }
+
+    .topbar .icon-button:only-child {
+      margin-left: auto;
     }
 
     .text-button.soft {
@@ -1076,7 +1066,6 @@
       <main class="screen">
         <section id="view-recipes" class="view active" aria-label="레시피">
           <div class="topbar">
-            <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
             <button class="icon-button" type="button" aria-label="레시피 검색" data-view-jump="shopping">
               <svg viewBox="0 0 24 24"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
             </button>
@@ -1167,7 +1156,6 @@
 
         <section id="view-timeline" class="view" aria-label="조리 순서">
           <div class="topbar">
-            <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
             <button class="icon-button" type="button" aria-label="장보기로 이동" data-view-jump="shopping">
               <svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
             </button>
