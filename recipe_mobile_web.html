@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>저녁 준비 모바일 플래너</title>
+  <meta name="description" content="저녁 메뉴, 장보기, 조리 순서를 모바일에서 확인하고 체크하는 설치형 웹앱입니다." />
+  <meta name="theme-color" content="#ead7cc" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="저녁 플래너" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" />
+  <style>
+    :root {
+      --page: #ead7cc;
+      --app: #f7f4f4;
+      --app-2: #f1dfd5;
+      --panel: #ffffff;
+      --panel-soft: #f4e3da;
+      --ink: #151311;
+      --muted: #7d756f;
+      --line: rgba(30, 24, 20, .08);
+      --lavender: #b8c1f4;
+      --mint: #cfe6df;
+      --butter: #ead875;
+      --peach: #ecdcd3;
+      --sage: #879567;
+      --coral: #df846e;
+      --blue: #89b8e8;
+      --shadow: 0 24px 72px rgba(87, 63, 48, .23);
+      --soft-shadow: 0 16px 36px rgba(67, 48, 38, .11);
+      --radius-xl: 34px;
+      --radius-lg: 25px;
+      --radius-md: 18px;
+      --nav-h: 78px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+      word-break: keep-all;
+      line-break: strict;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .phone-shell {
+      width: min(390px, 100%);
+      height: min(844px, calc(100vh - 48px));
+      border-radius: 38px;
+      background: linear-gradient(180deg, #fbfbff 0%, var(--app) 45%, var(--app-2) 100%);
+      border: 2px solid rgba(255, 255, 255, .8);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .app {
+      min-height: inherit;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      position: relative;
+    }
+
+    .screen {
+      padding: 26px 14px calc(var(--nav-h) + 22px);
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2px;
+      margin-bottom: 26px;
+    }
+
+    .brand-mark {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      transform: rotate(45deg);
+    }
+
+    .brand-mark span {
+      border-radius: 3px;
+      background: var(--ink);
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      color: #171412;
+      background: rgba(255, 255, 255, .74);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 18px rgba(90, 63, 47, .08);
+    }
+
+    .view {
+      display: none;
+      animation: enter .18s ease;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes enter {
+      from { opacity: .4; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .label {
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 332px;
+      font-size: 27px;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+
+    h1 .line {
+      display: block;
+    }
+
+    h1 strong,
+    h2 strong {
+      font-weight: 900;
+    }
+
+    .quick-note {
+      margin-top: 22px;
+      height: 54px;
+      border-radius: 19px;
+      background: #ecd9cf;
+      display: grid;
+      grid-template-columns: 1fr 38px;
+      align-items: center;
+      padding: 0 8px 0 16px;
+      color: #87766d;
+      font-size: 13px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+    }
+
+    .quick-note button {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 28px 0 12px;
+      padding: 0 2px;
+      white-space: nowrap;
+    }
+
+    .section-head h2 {
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .section-head small {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      border-radius: 25px;
+      overflow: hidden;
+    }
+
+    .recipe-card {
+      min-height: 103px;
+      border: 0;
+      padding: 14px 14px 12px;
+      color: var(--ink);
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      align-content: space-between;
+      cursor: pointer;
+    }
+
+    .recipe-card:active {
+      transform: scale(.985);
+    }
+
+    .recipe-card h3 {
+      position: relative;
+      z-index: 1;
+      max-width: 126px;
+      font-size: 12px;
+      line-height: 1.18;
+      letter-spacing: -.01em;
+      font-weight: 850;
+    }
+
+    .recipe-card p {
+      position: relative;
+      z-index: 1;
+      max-width: 105px;
+      color: rgba(21, 19, 17, .62);
+      font-size: 10.5px;
+      line-height: 1.32;
+      font-weight: 700;
+    }
+
+    .recipe-card:nth-child(5) {
+      grid-column: span 2;
+      min-height: 82px;
+    }
+
+    .recipe-card:nth-child(5) h3,
+    .recipe-card:nth-child(5) p {
+      max-width: 210px;
+    }
+
+    .card-art {
+      position: absolute;
+      right: 9px;
+      bottom: 8px;
+      width: 64px;
+      height: 52px;
+      color: rgba(20, 17, 14, .78);
+      opacity: .95;
+    }
+
+    .open-dot {
+      position: absolute;
+      right: 13px;
+      bottom: 13px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.28);
+      color: rgba(21, 19, 17, .78);
+      z-index: 2;
+    }
+
+    .feature-card {
+      margin-top: 4px;
+      min-height: 77px;
+      border-radius: 0 0 25px 25px;
+      background: rgba(255,255,255,.86);
+      padding: 12px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card h3 {
+      max-width: 250px;
+      font-size: 13px;
+      line-height: 1.22;
+      font-weight: 850;
+    }
+
+    .feature-card .mini-line {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.38;
+    }
+
+    .bubble-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .bubble-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .bubble {
+      flex: 0 0 auto;
+      min-width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #3a332f;
+      font-size: 11px;
+      line-height: 1.18;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(81, 60, 50, .08);
+    }
+
+    .progress-panel {
+      margin-top: 12px;
+      background: rgba(255,255,255,.9);
+      border-radius: 28px;
+      padding: 18px 16px 16px;
+      box-shadow: var(--soft-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-panel h3 {
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 850;
+    }
+
+    .progress-body {
+      display: grid;
+      grid-template-columns: 1fr 112px;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .percent {
+      font-size: 54px;
+      line-height: .9;
+      letter-spacing: -.04em;
+      font-weight: 500;
+    }
+
+    .percent span {
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .progress-copy {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.38;
+    }
+
+    .dot-meter {
+      display: grid;
+      grid-template-columns: repeat(5, 14px);
+      gap: 5px;
+      align-content: center;
+    }
+
+    .dot-meter span {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ebe7e6;
+    }
+
+    .dot-meter span.done {
+      background: #b6d7d1;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      margin: 22px -14px 14px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(247,244,244,.96), rgba(247,244,244,.86));
+      backdrop-filter: blur(12px);
+    }
+
+    .search-wrap {
+      height: 48px;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 8px;
+      align-items: center;
+      border-radius: 18px;
+      background: #fff;
+      padding: 0 14px;
+      box-shadow: 0 10px 24px rgba(67, 48, 38, .08);
+    }
+
+    .search-wrap input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.66);
+      color: #706861;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .chip.active {
+      background: #151311;
+      color: #fff;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .category-title {
+      margin: 18px 2px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #34302d;
+    }
+
+    .shopping-item,
+    .timeline-row {
+      border-radius: 20px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.6);
+      box-shadow: 0 10px 24px rgba(67, 48, 38, .07);
+    }
+
+    .shopping-item {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .shopping-main {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .shopping-main strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .shopping-main span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.38;
+    }
+
+    .qty {
+      color: #927f2d;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .check {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 14px;
+      background: rgba(246,241,239,.88);
+      padding: 0 9px;
+      color: #5c554f;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .check input {
+      width: 17px;
+      height: 17px;
+      accent-color: #151311;
+    }
+
+    .shopping-item.owned {
+      background: #eef6f2;
+    }
+
+    .shopping-item.bought {
+      background: #f4ead2;
+      opacity: .72;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .timeline-row {
+      min-height: 74px;
+      padding: 13px;
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .time {
+      color: #9b785f;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .task strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.25;
+      margin-bottom: 5px;
+    }
+
+    .task span {
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.48;
+    }
+
+    .nav {
+      position: absolute;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: 166px;
+      height: 58px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      gap: 2px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 14px 34px rgba(65, 46, 35, .18);
+      z-index: 20;
+      padding: 6px;
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 18px;
+      background: transparent;
+      color: #181511;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .nav button.active {
+      background: #151311;
+      color: #fff;
+      box-shadow: 0 10px 18px rgba(15, 13, 11, .2);
+    }
+
+    .modal {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: end;
+      background: rgba(22, 18, 15, .38);
+      padding-top: 70px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .sheet {
+      width: 100%;
+      max-height: 92%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      border-radius: 31px 31px 0 0;
+      overflow: hidden;
+      background: #f7f4f4;
+      box-shadow: 0 -22px 44px rgba(34, 25, 19, .26);
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sheet-head strong {
+      min-width: 0;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .sheet-head button {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 999px;
+      background: #efe4de;
+      padding: 9px 12px;
+      color: #28231f;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .sheet-body {
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .poster {
+      border-radius: 28px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: var(--soft-shadow);
+    }
+
+    .poster-top {
+      min-height: 190px;
+      padding: 22px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .poster-top h2 {
+      max-width: 286px;
+      font-size: 28px;
+      line-height: 1.12;
+      letter-spacing: -.03em;
+      font-weight: 900;
+    }
+
+    .poster-top p {
+      max-width: 230px;
+      margin-top: 10px;
+      color: rgba(21,19,17,.62);
+      font-size: 12px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .poster-meta {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .poster-meta span {
+      border-radius: 999px;
+      background: rgba(255,255,255,.45);
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .poster-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .poster-block {
+      border-radius: 20px;
+      background: #f7f4f2;
+      padding: 14px;
+    }
+
+    .poster-block h3 {
+      margin-bottom: 9px;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .poster-block ul,
+    .poster-block ol {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .poster-block li {
+      margin: 6px 0;
+      color: #453f3a;
+      font-size: 13px;
+      line-height: 1.52;
+    }
+
+    .poster-block p {
+      color: #453f3a;
+      font-size: 13px;
+      line-height: 1.52;
+    }
+
+    .empty {
+      padding: 38px 8px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    svg {
+      width: 19px;
+      height: 19px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        display: block;
+        padding: 0;
+        background: var(--app);
+      }
+
+      .phone-shell {
+        width: 100%;
+        height: 100vh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .screen {
+        padding-top: max(22px, env(safe-area-inset-top));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-shell">
+    <div class="app">
+      <main class="screen">
+        <section id="view-recipes" class="view active" aria-label="레시피">
+          <div class="topbar">
+            <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <button class="icon-button" type="button" aria-label="레시피 검색" data-view-jump="shopping">
+              <svg viewBox="0 0 24 24"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+            </button>
+          </div>
+
+          <p class="label">Dinner practices</p>
+          <h1><span class="line">오늘 저녁 준비,</span><span class="line"><strong>무엇부터</strong> 볼까요?</span></h1>
+
+          <div class="quick-note">
+            <span>필요한 재료와 조리 순서를 바로 확인하세요.</span>
+            <button type="button" aria-label="장보기로 이동" data-view-jump="shopping">
+              <svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+            </button>
+          </div>
+
+          <div class="section-head">
+            <h2>추천 레시피</h2>
+            <small id="recipeCount">5개 메뉴</small>
+          </div>
+
+          <div id="recipeGrid" class="recipe-grid"></div>
+
+          <article class="feature-card">
+            <h3>장보기와 조리 순서를<br>한 화면에서 이어서 체크</h3>
+            <p class="mini-line">보유 재료, 구매 완료, 타임라인이 로컬에 저장됩니다.</p>
+            <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+          </article>
+        </section>
+
+        <section id="view-shopping" class="view" aria-label="장보기">
+          <div class="topbar">
+            <button class="icon-button" type="button" aria-label="레시피로 돌아가기" data-view-jump="recipes">
+              <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="icon-button" type="button" aria-label="필터">
+              <svg viewBox="0 0 24 24"><path d="M4 7h10"/><path d="M18 7h2"/><circle cx="16" cy="7" r="2"/><path d="M4 17h2"/><path d="M10 17h10"/><circle cx="8" cy="17" r="2"/></svg>
+            </button>
+          </div>
+
+          <p class="label">Shopping check</p>
+          <h1><span class="line">필요한 재료를</span><span class="line"><strong>가볍게</strong> 체크하세요.</span></h1>
+
+          <div class="section-head">
+            <h2>분류별 요약</h2>
+            <small id="shoppingSummary">-</small>
+          </div>
+
+          <div class="bubble-row" id="categoryBubbles"></div>
+
+          <div class="progress-panel">
+            <h3>준비 진행률</h3>
+            <div class="progress-body">
+              <div>
+                <div class="percent"><span id="progressNumber">0</span><span>%</span></div>
+                <p class="progress-copy" id="progressCopy">체크한 재료가 아직 없습니다.</p>
+              </div>
+              <div class="dot-meter" id="dotMeter"></div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+              <input id="searchBox" type="search" placeholder="재료 검색: 새우, 마늘, 파스타..." />
+            </label>
+            <div class="chips" id="filters"></div>
+            <div class="chips" id="recipeFilters"></div>
+          </div>
+
+          <div id="shoppingList"></div>
+        </section>
+
+        <section id="view-timeline" class="view" aria-label="조리 순서">
+          <div class="topbar">
+            <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <button class="icon-button" type="button" aria-label="장보기로 이동" data-view-jump="shopping">
+              <svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
+            </button>
+          </div>
+
+          <p class="label">Cooking timeline</p>
+          <h1><span class="line">긴 조리는 먼저,</span><span class="line"><strong>빠른 요리는</strong> 마지막에.</span></h1>
+
+          <div class="quick-note">
+            <span>삼겹살은 가장 먼저 시작하고 감바스는 마지막 10분에 조리합니다.</span>
+            <button type="button" aria-label="맨 아래로 이동" onclick="document.getElementById('timeline').lastElementChild?.scrollIntoView({behavior:'smooth', block:'nearest'})">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            </button>
+          </div>
+
+          <div id="timeline" class="timeline"></div>
+        </section>
+      </main>
+
+      <nav class="nav" aria-label="하단 메뉴">
+        <button class="active" type="button" data-view="recipes" aria-label="레시피">
+          <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg>
+        </button>
+        <button type="button" data-view="shopping" aria-label="장보기">
+          <svg viewBox="0 0 24 24"><path d="M6 7h15l-2 9H8L6 7Z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+        </button>
+        <button type="button" data-view="timeline" aria-label="조리 순서">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>
+        </button>
+      </nav>
+
+      <div id="recipeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="sheet">
+          <div class="sheet-head">
+            <strong id="modalTitle">레시피</strong>
+            <button type="button" onclick="closeRecipe()">닫기</button>
+          </div>
+          <div class="sheet-body" id="modalBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const recipes = [
+      {
+        id: 'pork',
+        title: '텍사스 바비큐 삼겹살',
+        short: '오븐 저온 조리',
+        tint: '#b8c1f4',
+        time: '6~7시간',
+        serving: '4인분',
+        level: '중간',
+        desc: '소금과 후추 중심의 드라이럽으로 오래 익혀 부드럽게 만드는 메인 요리입니다.',
+        ingredients: ['통삼겹살 1~1.2kg', '굵은 소금 12g', '굵게 간 후추 12g', '마늘가루 1작은술', '양파가루 1작은술', '훈제 파프리카가루 1작은술', '머스터드 1큰술', '무염버터 20g', '사과주스 3큰술'],
+        steps: ['고기 표면의 물기를 닦고 지방층에 얕게 칼집을 냅니다.', '머스터드를 얇게 바른 뒤 소금, 후추, 향신료를 고르게 묻힙니다.', '110~120도 오븐에서 3~4시간 1차 조리합니다.', '버터와 사과주스를 넣고 포일로 감싸 93~96도까지 익힙니다.', '40분 이상 휴지한 뒤 필요하면 고온에서 겉면만 짧게 마무리합니다.'],
+        key: '온도계가 있으면 성공률이 크게 올라갑니다. 중심 온도보다 꼬치가 부드럽게 들어가는 상태를 함께 확인하세요.'
+      },
+      {
+        id: 'bouillabaisse',
+        title: '프렌치 부야베스',
+        short: '해산물 스튜',
+        tint: '#ead875',
+        time: '70분',
+        serving: '4인분',
+        level: '중간',
+        desc: '토마토, 오렌지 껍질, 해산물 향을 쌓아 만드는 따뜻한 국물 요리입니다.',
+        ingredients: ['흰살생선 700g', '새우 8마리', '홍합 300g', '바지락 200g', '양파 1개', '감자 2개', '셀러리 1대', '마늘 6쪽', '토마토 2개', '화이트와인 100ml', '오렌지 껍질 약간'],
+        steps: ['양파, 셀러리, 마늘을 올리브오일에 천천히 볶습니다.', '토마토와 토마토페이스트를 넣고 수분을 날립니다.', '화이트와인을 넣어 향을 올린 뒤 물이나 생선 육수를 붓습니다.', '감자를 먼저 익히고 생선, 조개, 새우 순서로 넣습니다.', '마지막에 소금, 후추, 오렌지 껍질로 향을 맞춥니다.'],
+        key: '조개와 새우는 오래 끓이면 질겨집니다. 국물 베이스를 먼저 완성한 뒤 마지막에 넣으세요.'
+      },
+      {
+        id: 'gambas',
+        title: '감바스 알 아히요',
+        short: '마지막 10분',
+        tint: '#cfe6df',
+        time: '15분',
+        serving: '4인분',
+        level: '쉬움',
+        desc: '마늘 향을 천천히 낸 오일에 새우를 짧게 익혀 빵과 곁들이는 요리입니다.',
+        ingredients: ['새우 20마리', '올리브오일 250ml', '마늘 12쪽', '페페론치노 5개', '소금 약간', '후추 약간', '파슬리 약간', '레몬 1개', '바게트'],
+        steps: ['새우 물기를 충분히 닦고 소금, 후추로 밑간합니다.', '마늘은 도톰하게 슬라이스합니다.', '오일, 마늘, 페페론치노를 약불에서 천천히 데웁니다.', '마늘이 연하게 색이 나면 새우를 넣고 짧게 익힙니다.', '불을 끄고 파슬리와 레몬즙으로 마무리합니다.'],
+        key: '센 불은 금물입니다. 마늘은 타지 않게, 새우는 질겨지지 않게 짧게 익히세요.'
+      },
+      {
+        id: 'pasta',
+        title: '김풍식 냉파스타',
+        short: '차갑게 무침',
+        tint: '#ecdcd3',
+        time: '25분',
+        serving: '4인분',
+        level: '쉬움',
+        desc: '초고추장과 토마토소스를 섞어 새콤하게 먹는 차가운 파스타입니다.',
+        ingredients: ['카펠리니 300g', '우삼겹 150g', '초고추장 5큰술', '토마토 파스타소스 6큰술', '참기름 2큰술', '식초 1큰술', '오이 1개', '깻잎 10장', '방울토마토 10개', '계란 2개'],
+        steps: ['우삼겹을 바삭하게 굽고 기름을 제거합니다.', '면을 삶아 찬물에 헹군 뒤 물기를 충분히 뺍니다.', '초고추장, 토마토소스, 참기름, 식초를 섞습니다.', '면과 소스를 버무리고 채소와 우삼겹을 올립니다.', '깨와 삶은 계란으로 마무리합니다.'],
+        key: '면의 물기를 충분히 빼야 소스가 묽어지지 않습니다.'
+      },
+      {
+        id: 'romesco',
+        title: '로메스코 소스',
+        short: '곁들임 소스',
+        tint: '#df846e',
+        time: '25분',
+        serving: '4인분',
+        level: '쉬움',
+        desc: '구운 파프리카와 아몬드를 갈아 생선, 고기, 바게트에 곁들이는 소스입니다.',
+        ingredients: ['빨간 파프리카 2개', '토마토 1개', '마늘 2쪽', '아몬드 50g', '바게트 30g', '올리브오일 100ml', '식초 1큰술', '레몬즙 1큰술', '훈제 파프리카가루 1작은술'],
+        steps: ['파프리카를 구워 껍질을 벗깁니다.', '토마토와 마늘도 살짝 구워 단맛을 냅니다.', '아몬드와 바게트를 마른 팬에 볶습니다.', '모든 재료를 믹서에 넣고 곱게 갑니다.', '소금, 식초, 레몬즙으로 산미를 맞춥니다.'],
+        key: '너무 되직하면 올리브오일이나 물을 조금씩 더해 농도를 맞추세요.'
+      }
+    ];
+
+    const shoppingItems = [
+      { id:'porkbelly', cat:'육류', name:'통삼겹살', qty:'1~1.2kg', use:'텍사스 바비큐 삼겹살', dishes:['pork'] },
+      { id:'woosam', cat:'육류', name:'우삼겹', qty:'150g', use:'냉파스타 고명', dishes:['pasta'] },
+      { id:'fish', cat:'해산물', name:'흰살생선', qty:'700g', use:'부야베스', dishes:['bouillabaisse'] },
+      { id:'shrimp', cat:'해산물', name:'새우', qty:'28마리', use:'부야베스 8마리, 감바스 20마리', dishes:['bouillabaisse','gambas'] },
+      { id:'mussels', cat:'해산물', name:'홍합', qty:'300g', use:'부야베스', dishes:['bouillabaisse'] },
+      { id:'clams', cat:'해산물', name:'바지락', qty:'200g', use:'부야베스', dishes:['bouillabaisse'] },
+      { id:'onion', cat:'채소', name:'양파', qty:'1개', use:'부야베스 베이스', dishes:['bouillabaisse'] },
+      { id:'potato', cat:'채소', name:'감자', qty:'2개', use:'부야베스', dishes:['bouillabaisse'] },
+      { id:'celery', cat:'채소', name:'셀러리', qty:'1대', use:'부야베스 향채', dishes:['bouillabaisse'] },
+      { id:'garlic', cat:'채소', name:'마늘', qty:'25쪽 내외', use:'부야베스, 감바스, 로메스코', dishes:['bouillabaisse','gambas','romesco'] },
+      { id:'tomato', cat:'채소', name:'토마토', qty:'3개', use:'부야베스와 로메스코', dishes:['bouillabaisse','romesco'] },
+      { id:'pepper', cat:'채소', name:'빨간 파프리카', qty:'2개', use:'로메스코 소스', dishes:['romesco'] },
+      { id:'lemon', cat:'과일', name:'레몬', qty:'1개', use:'감바스와 로메스코', dishes:['gambas','romesco'] },
+      { id:'orange', cat:'과일', name:'오렌지', qty:'1개', use:'부야베스 향', dishes:['bouillabaisse'] },
+      { id:'cucumber', cat:'채소', name:'오이', qty:'1개', use:'냉파스타', dishes:['pasta'] },
+      { id:'perilla', cat:'채소', name:'깻잎', qty:'10장', use:'냉파스타', dishes:['pasta'] },
+      { id:'cherrytomato', cat:'채소', name:'방울토마토', qty:'10개', use:'냉파스타', dishes:['pasta'] },
+      { id:'capellini', cat:'면/빵', name:'카펠리니', qty:'300g', use:'냉파스타', dishes:['pasta'] },
+      { id:'baguette', cat:'면/빵', name:'바게트', qty:'2개', use:'감바스, 로메스코, 부야베스 곁들임', dishes:['bouillabaisse','gambas','romesco'] },
+      { id:'egg', cat:'기타', name:'계란', qty:'2개', use:'냉파스타', dishes:['pasta'] },
+      { id:'oliveoil', cat:'소스/양념', name:'올리브오일', qty:'500ml 이상', use:'부야베스, 감바스, 로메스코', dishes:['bouillabaisse','gambas','romesco'] },
+      { id:'salt', cat:'소스/양념', name:'굵은 소금', qty:'1통', use:'전체 간 맞춤', dishes:['pork','bouillabaisse','gambas','romesco'] },
+      { id:'blackpepper', cat:'소스/양념', name:'굵게 간 후추', qty:'1통', use:'전체 간 맞춤', dishes:['pork','bouillabaisse','gambas','pasta','romesco'] },
+      { id:'garlicpowder', cat:'소스/양념', name:'마늘가루', qty:'1개', use:'바비큐 럽', dishes:['pork'] },
+      { id:'smokedpaprika', cat:'소스/양념', name:'훈제 파프리카가루', qty:'1개', use:'바비큐와 로메스코', dishes:['pork','romesco'] },
+      { id:'mustard', cat:'소스/양념', name:'머스터드', qty:'1개', use:'바비큐 접착제', dishes:['pork'] },
+      { id:'butter', cat:'소스/양념', name:'무염버터', qty:'20g', use:'바비큐 포일 랩', dishes:['pork'] },
+      { id:'whitewine', cat:'소스/양념', name:'화이트와인', qty:'100ml', use:'부야베스', dishes:['bouillabaisse'] },
+      { id:'peperoncino', cat:'소스/양념', name:'페페론치노', qty:'소량', use:'감바스', dishes:['gambas'] },
+      { id:'almond', cat:'소스/양념', name:'아몬드', qty:'50g', use:'로메스코', dishes:['romesco'] },
+      { id:'vinegar', cat:'소스/양념', name:'식초', qty:'1개', use:'냉파스타와 로메스코', dishes:['pasta','romesco'] },
+      { id:'gochujang', cat:'소스/양념', name:'초고추장', qty:'1개', use:'냉파스타', dishes:['pasta'] },
+      { id:'pastasauce', cat:'소스/양념', name:'토마토 파스타소스', qty:'1병', use:'냉파스타', dishes:['pasta'] },
+      { id:'sesameoil', cat:'소스/양념', name:'참기름', qty:'1개', use:'냉파스타', dishes:['pasta'] }
+    ];
+
+    const timeline = [
+      ['전날 또는 오전', '삼겹살 밑간', '럽을 바르고 냉장고에서 4시간 이상 두면 간이 안정됩니다.'],
+      ['조리 7시간 전', '삼겹살 실온 복귀', '30분 정도 실온에 두고 오븐을 110~120도로 예열합니다.'],
+      ['조리 6시간 전', '삼겹살 1차 저온 조리', '오븐에서 3~4시간 천천히 익혀 속 온도를 올립니다.'],
+      ['조리 3시간 전', '포일 랩', '버터와 사과주스를 넣고 감싸 부드럽게 마무리합니다.'],
+      ['조리 2시간 전', '부야베스 베이스', '채소, 토마토, 와인, 오렌지 향으로 국물의 바탕을 만듭니다.'],
+      ['조리 90분 전', '로메스코 소스', '파프리카를 굽고 아몬드와 함께 갈아 둡니다.'],
+      ['조리 60분 전', '삼겹살 휴지', '고기를 꺼내 최소 40분 이상 쉬게 합니다.'],
+      ['조리 35분 전', '부야베스 완성', '감자, 생선, 조개, 새우 순서로 넣어 익힙니다.'],
+      ['조리 25분 전', '냉파스타', '면을 삶아 차갑게 식히고 소스와 버무립니다.'],
+      ['조리 10분 전', '감바스', '약불에서 마늘 향을 내고 새우를 짧게 익힙니다.'],
+      ['마지막', '삼겹살 고온 마무리', '겉면이 필요하면 220~230도에서 8~12분만 마무리합니다.']
+    ];
+
+    const stateKey = 'dinnerPlannerShoppingStateV2';
+    const state = JSON.parse(localStorage.getItem(stateKey) || '{}');
+    let activeFilter = 'need';
+    let recipeFilter = 'all';
+
+    const icons = {
+      steam: '<svg class="card-art" viewBox="0 0 80 64"><path d="M13 52c12-15 28-15 40 0"/><path d="M24 16c-9 10 8 11-1 22"/><path d="M42 11c-11 12 10 13-1 27"/><path d="M59 18c-8 8 7 10-1 20"/></svg>',
+      pot: '<svg class="card-art" viewBox="0 0 80 64"><path d="M17 29h46l-5 22H22z"/><path d="M25 25h30"/><path d="M30 20h20"/><path d="M13 34h7"/><path d="M60 34h7"/></svg>',
+      shrimp: '<svg class="card-art" viewBox="0 0 80 64"><path d="M23 39c9 11 31 8 35-7 2-9-6-17-17-16"/><path d="M42 16c-18 1-23 16-13 24"/><path d="M25 40l-8 8"/><path d="M56 23l9-8"/><path d="M51 30h.1"/></svg>',
+      noodle: '<svg class="card-art" viewBox="0 0 80 64"><path d="M17 30h46l-6 22H23z"/><path d="M24 21c0 9 5 9 5 18"/><path d="M38 16c0 12 5 12 5 25"/><path d="M53 20c0 10 4 10 4 20"/></svg>',
+      sauce: '<svg class="card-art" viewBox="0 0 80 64"><path d="M31 15h18"/><path d="M34 15l-4 36h24l-4-36"/><path d="M31 32h22"/><path d="M37 40h10"/></svg>'
+    };
+
+    function saveState() {
+      localStorage.setItem(stateKey, JSON.stringify(state));
+    }
+
+    function getItemState(id) {
+      return state[id] || { owned: false, bought: false };
+    }
+
+    function setItemState(id, key, value) {
+      state[id] = getItemState(id);
+      state[id][key] = value;
+      if (key === 'owned' && value) state[id].bought = false;
+      if (key === 'bought' && value) state[id].owned = false;
+      saveState();
+      renderShopping();
+      updateStats();
+    }
+
+    function setView(name) {
+      document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === `view-${name}`));
+      document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
+      if (name === 'shopping') renderShopping();
+      document.querySelector('.screen').scrollTo?.({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderRecipes() {
+      const art = ['steam', 'pot', 'shrimp', 'noodle', 'sauce'];
+      document.getElementById('recipeGrid').innerHTML = recipes.map((recipe, index) => `
+        <button class="recipe-card" type="button" onclick="openRecipe('${recipe.id}')" style="background:${recipe.tint}">
+          <h3>${recipe.title}</h3>
+          <p>${recipe.short}</p>
+          ${icons[art[index]]}
+          <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+        </button>
+      `).join('');
+      document.getElementById('recipeCount').textContent = `${recipes.length}개 메뉴`;
+    }
+
+    function openRecipe(id) {
+      const recipe = recipes.find(item => item.id === id);
+      document.getElementById('modalTitle').textContent = recipe.title;
+      document.getElementById('modalBody').innerHTML = `
+        <article class="poster">
+          <div class="poster-top" style="background:${recipe.tint}">
+            <p class="label">${recipe.short}</p>
+            <h2>${recipe.title}</h2>
+            <p>${recipe.desc}</p>
+            <div class="poster-meta">
+              <span>${recipe.serving}</span>
+              <span>${recipe.time}</span>
+              <span>난이도 ${recipe.level}</span>
+            </div>
+          </div>
+          <div class="poster-body">
+            <section class="poster-block">
+              <h3>재료</h3>
+              <ul>${recipe.ingredients.map(item => `<li>${item}</li>`).join('')}</ul>
+            </section>
+            <section class="poster-block">
+              <h3>조리 방법</h3>
+              <ol>${recipe.steps.map(step => `<li>${step}</li>`).join('')}</ol>
+            </section>
+            <section class="poster-block">
+              <h3>핵심 포인트</h3>
+              <p>${recipe.key}</p>
+            </section>
+          </div>
+        </article>
+      `;
+      document.getElementById('recipeModal').classList.add('open');
+    }
+
+    function closeRecipe() {
+      document.getElementById('recipeModal').classList.remove('open');
+    }
+
+    function renderFilters() {
+      const filters = [['all', '전체'], ['need', '필요'], ['owned', '집에 있음'], ['bought', '구매 완료']];
+      document.getElementById('filters').innerHTML = filters.map(([id, label]) => `
+        <button class="chip ${activeFilter === id ? 'active' : ''}" type="button" onclick="activeFilter='${id}'; renderShopping();">${label}</button>
+      `).join('');
+
+      const recipeFilters = [['all', '전체 메뉴'], ...recipes.map(recipe => [recipe.id, recipe.title])];
+      document.getElementById('recipeFilters').innerHTML = recipeFilters.map(([id, label]) => `
+        <button class="chip ${recipeFilter === id ? 'active' : ''}" type="button" onclick="recipeFilter='${id}'; renderShopping();">${label}</button>
+      `).join('');
+    }
+
+    function filteredItems() {
+      const query = document.getElementById('searchBox').value.trim().toLowerCase();
+      return shoppingItems.filter(item => {
+        const itemState = getItemState(item.id);
+        const text = `${item.cat} ${item.name} ${item.qty} ${item.use}`.toLowerCase();
+        if (query && !text.includes(query)) return false;
+        if (recipeFilter !== 'all' && !item.dishes.includes(recipeFilter)) return false;
+        if (activeFilter === 'need' && (itemState.owned || itemState.bought)) return false;
+        if (activeFilter === 'owned' && !itemState.owned) return false;
+        if (activeFilter === 'bought' && !itemState.bought) return false;
+        return true;
+      });
+    }
+
+    function renderCategoryBubbles() {
+      const colors = ['#ead875', '#879567', '#b8c1f4', '#df846e', '#cfe6df', '#ecdcd3'];
+      const counts = shoppingItems.reduce((map, item) => {
+        map[item.cat] = (map[item.cat] || 0) + 1;
+        return map;
+      }, {});
+      document.getElementById('categoryBubbles').innerHTML = Object.entries(counts).map(([cat, count], index) => `
+        <button class="bubble" type="button" style="background:${colors[index % colors.length]}" onclick="document.getElementById('searchBox').value='${cat}'; renderShopping();">
+          ${cat}<br>${count}
+        </button>
+      `).join('');
+    }
+
+    function renderShopping() {
+      renderFilters();
+      renderCategoryBubbles();
+      const items = filteredItems();
+      const groups = items.reduce((map, item) => {
+        if (!map[item.cat]) map[item.cat] = [];
+        map[item.cat].push(item);
+        return map;
+      }, {});
+
+      const list = document.getElementById('shoppingList');
+      const categories = Object.keys(groups);
+      if (!categories.length) {
+        list.innerHTML = '<div class="empty">표시할 재료가 없습니다.</div>';
+        updateStats();
+        return;
+      }
+
+      list.innerHTML = categories.map(category => `
+        <div class="category-title">${category}</div>
+        <div class="list">
+          ${groups[category].map(item => {
+            const itemState = getItemState(item.id);
+            return `
+              <article class="shopping-item ${itemState.owned ? 'owned' : ''} ${itemState.bought ? 'bought' : ''}">
+                <div class="shopping-main">
+                  <div>
+                    <strong>${item.name}</strong>
+                    <span>${item.use}</span>
+                  </div>
+                  <div class="qty">${item.qty}</div>
+                </div>
+                <div class="checks">
+                  <label class="check"><input type="checkbox" ${itemState.owned ? 'checked' : ''} onchange="setItemState('${item.id}', 'owned', this.checked)">집에 있음</label>
+                  <label class="check"><input type="checkbox" ${itemState.bought ? 'checked' : ''} onchange="setItemState('${item.id}', 'bought', this.checked)">구매 완료</label>
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      `).join('');
+
+      updateStats();
+    }
+
+    function updateStats() {
+      const total = shoppingItems.length;
+      const owned = shoppingItems.filter(item => getItemState(item.id).owned).length;
+      const bought = shoppingItems.filter(item => getItemState(item.id).bought).length;
+      const done = owned + bought;
+      const need = total - done;
+      const pct = Math.round(done / total * 100);
+
+      document.getElementById('shoppingSummary').textContent = `필요 ${need} · 보유 ${owned} · 완료 ${bought}`;
+      document.getElementById('progressNumber').textContent = pct;
+      document.getElementById('progressCopy').textContent = done ? `${done}개 재료가 처리됐고 ${need}개가 남았습니다.` : '체크한 재료가 아직 없습니다.';
+
+      const dots = 20;
+      const filled = Math.round(pct / 100 * dots);
+      document.getElementById('dotMeter').innerHTML = Array.from({ length: dots }, (_, index) => `<span class="${index < filled ? 'done' : ''}"></span>`).join('');
+    }
+
+    function renderTimeline() {
+      document.getElementById('timeline').innerHTML = timeline.map(([time, title, desc]) => `
+        <article class="timeline-row">
+          <div class="time">${time}</div>
+          <div class="task"><strong>${title}</strong><span>${desc}</span></div>
+        </article>
+      `).join('');
+    }
+
+    document.querySelectorAll('.nav button').forEach(button => {
+      button.addEventListener('click', () => setView(button.dataset.view));
+    });
+
+    document.querySelectorAll('[data-view-jump]').forEach(button => {
+      button.addEventListener('click', () => setView(button.dataset.viewJump));
+    });
+
+    document.getElementById('recipeModal').addEventListener('click', event => {
+      if (event.target.id === 'recipeModal') closeRecipe();
+    });
+
+    document.getElementById('searchBox').addEventListener('input', renderShopping);
+
+    renderRecipes();
+    renderShopping();
+    renderTimeline();
+    updateStats();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

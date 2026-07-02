@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="저녁 플래너 앱 아이콘">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="40" x2="448" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8f4f4"/>
+      <stop offset=".52" stop-color="#eadfd9"/>
+      <stop offset="1" stop-color="#e8cbbd"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="122" y1="122" x2="390" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b8c1f4"/>
+      <stop offset=".5" stop-color="#ead875"/>
+      <stop offset="1" stop-color="#df846e"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="154" fill="white" opacity=".7"/>
+  <path d="M171 177h170l-22 154H193l-22-154Z" fill="url(#accent)" stroke="#151311" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M204 177c0-38 23-67 52-67s52 29 52 67" fill="none" stroke="#151311" stroke-width="18" stroke-linecap="round"/>
+  <path d="M213 250h86M213 292h64" stroke="#151311" stroke-width="18" stroke-linecap="round"/>
+  <path d="M336 316l44 44m0-44v44h-44" fill="none" stroke="#151311" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

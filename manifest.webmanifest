@@ -1,0 +1,32 @@
+{
+  "name": "저녁 준비 모바일 플래너",
+  "short_name": "저녁 플래너",
+  "description": "저녁 메뉴, 장보기, 조리 순서를 모바일에서 확인하고 체크하는 설치형 웹앱입니다.",
+  "lang": "ko-KR",
+  "start_url": "./recipe_mobile_web.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ead7cc",
+  "theme_color": "#ead7cc",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
