@@ -416,6 +416,17 @@
       cursor: pointer;
     }
 
+    .utility-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .utility-actions .install-button {
+      margin-top: 0;
+    }
+
     .install-button svg {
       width: 16px;
       height: 16px;
@@ -424,6 +435,17 @@
     .install-button.is-installed {
       background: #879567;
       cursor: default;
+    }
+
+    .install-button.secondary {
+      background: rgba(255,255,255,.92);
+      color: #151311;
+      box-shadow: 0 10px 20px rgba(15, 13, 11, .08);
+    }
+
+    .install-button.secondary.is-active {
+      background: #879567;
+      color: #fff;
     }
 
     .bubble-row {
@@ -1015,9 +1037,22 @@
       }
 
       .screen {
-        padding-top: max(22px, env(safe-area-inset-top));
+        padding-top: max(12px, env(safe-area-inset-top));
         min-height: 100dvh;
         overflow: visible;
+      }
+
+      .topbar {
+        margin-bottom: 16px;
+      }
+
+      .quick-note {
+        margin-top: 16px;
+        height: 50px;
+      }
+
+      .section-head {
+        margin: 20px 0 10px;
       }
 
       .nav {
@@ -1066,10 +1101,16 @@
           <article class="feature-card">
             <h3>장보기와 조리 순서를<br>한 화면에서 이어서 체크</h3>
             <p class="mini-line">보유 재료, 구매 완료, 타임라인이 로컬에 저장됩니다.</p>
-            <button id="installAppButton" class="install-button" type="button" onclick="handleInstallClick()">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-              홈화면에 설치
-            </button>
+            <div class="utility-actions">
+              <button id="installAppButton" class="install-button" type="button" onclick="handleInstallClick()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                홈화면에 설치
+              </button>
+              <button id="wakeLockButton" class="install-button secondary" type="button" onclick="toggleWakeLock()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="m4.22 4.22 2.12 2.12"/><path d="m17.66 17.66 2.12 2.12"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.22 19.78 2.12-2.12"/><path d="m17.66 6.34 2.12-2.12"/><circle cx="12" cy="12" r="4"/></svg>
+                화면 켜두기
+              </button>
+            </div>
             <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
           </article>
         </section>
@@ -1304,6 +1345,8 @@
     let shoppingItems = [];
     let db;
     let deferredInstallPrompt = null;
+    let wakeLock = null;
+    let wakeLockWanted = false;
 
     const dbName = 'dinnerPlannerContentDB';
     const dbVersion = 1;
@@ -1570,6 +1613,77 @@
         </div>
         <button class="text-button" type="button" onclick="closeEditor()">확인</button>
       `);
+    }
+
+    function updateWakeLockButton() {
+      const button = document.getElementById('wakeLockButton');
+      if (!button) return;
+      const active = Boolean(wakeLock);
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+      button.innerHTML = active
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>화면 켜두는 중'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="m4.22 4.22 2.12 2.12"/><path d="m17.66 17.66 2.12 2.12"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.22 19.78 2.12-2.12"/><path d="m17.66 6.34 2.12-2.12"/><circle cx="12" cy="12" r="4"/></svg>화면 켜두기';
+    }
+
+    function openWakeLockGuide() {
+      openEditor('자동 잠금 방지 안내', `
+        <div class="poster-block">
+          <h3>이 브라우저에서는 바로 켤 수 없어요</h3>
+          <p>화면 켜두기 기능은 일부 모바일 브라우저에서만 지원됩니다. 조리 중 화면이 꺼지면 휴대폰 설정에서 자동 잠금 시간을 잠시 늘려 주세요.</p>
+        </div>
+        <div class="poster-block">
+          <h3>사용 팁</h3>
+          <ol>
+            <li>앱을 홈화면에 설치한 뒤 다시 열면 지원되는 경우가 많습니다.</li>
+            <li>버튼을 켠 뒤에는 이 화면이 보이는 동안 자동 잠금을 최대한 막습니다.</li>
+            <li>배터리 절약 모드나 브라우저 정책에 따라 자동으로 해제될 수 있습니다.</li>
+          </ol>
+        </div>
+        <button class="text-button" type="button" onclick="closeEditor()">확인</button>
+      `);
+    }
+
+    async function requestWakeLock() {
+      wakeLockWanted = true;
+      if (!('wakeLock' in navigator)) {
+        wakeLockWanted = false;
+        updateWakeLockButton();
+        openWakeLockGuide();
+        return;
+      }
+
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {
+          wakeLock = null;
+          updateWakeLockButton();
+        });
+        updateWakeLockButton();
+      } catch (error) {
+        wakeLockWanted = false;
+        wakeLock = null;
+        updateWakeLockButton();
+        openWakeLockGuide();
+      }
+    }
+
+    async function releaseWakeLock() {
+      wakeLockWanted = false;
+      if (wakeLock) {
+        const lock = wakeLock;
+        wakeLock = null;
+        await lock.release().catch(() => {});
+      }
+      updateWakeLockButton();
+    }
+
+    async function toggleWakeLock() {
+      if (wakeLock) {
+        await releaseWakeLock();
+      } else {
+        await requestWakeLock();
+      }
     }
 
     function openRecipeEditor(id = '') {
@@ -1896,6 +2010,12 @@
       updateInstallButton(true);
     });
 
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && wakeLockWanted && !wakeLock) {
+        requestWakeLock();
+      }
+    });
+
     async function initApp() {
       db = await openDatabase();
       await seedDatabaseIfNeeded();
@@ -1905,6 +2025,7 @@
       renderTimeline();
       updateStats();
       updateInstallButton();
+      updateWakeLockButton();
     }
 
     initApp().catch(error => {
