@@ -261,13 +261,14 @@
     .recipe-card {
       min-height: 103px;
       border: 0;
-      padding: 14px 14px 12px;
+      padding: 14px 12px 12px;
       color: var(--ink);
       text-align: left;
       position: relative;
       overflow: hidden;
       display: grid;
       align-content: space-between;
+      isolation: isolate;
     }
 
     .recipe-card:active {
@@ -289,17 +290,18 @@
     .recipe-card h3 {
       position: relative;
       z-index: 2;
-      max-width: 126px;
+      max-width: calc(100% - 68px);
       font-size: 12px;
       line-height: 1.18;
       letter-spacing: -.01em;
       font-weight: 850;
+      min-height: 30px;
     }
 
     .recipe-card p {
       position: relative;
       z-index: 2;
-      max-width: 105px;
+      max-width: calc(100% - 76px);
       color: rgba(21, 19, 17, .62);
       font-size: 10.5px;
       line-height: 1.32;
@@ -313,23 +315,25 @@
 
     .recipe-card:last-child:nth-child(odd) h3,
     .recipe-card:last-child:nth-child(odd) p {
-      max-width: 210px;
+      max-width: calc(100% - 98px);
     }
 
     .card-art {
       position: absolute;
-      right: 9px;
+      right: 38px;
       bottom: 8px;
-      width: 64px;
-      height: 52px;
+      width: 58px;
+      height: 48px;
       color: rgba(20, 17, 14, .78);
       opacity: .95;
+      z-index: 1;
+      pointer-events: none;
     }
 
     .open-dot {
       position: absolute;
-      right: 13px;
-      bottom: 13px;
+      right: 8px;
+      bottom: 10px;
       width: 26px;
       height: 26px;
       border-radius: 50%;
@@ -350,8 +354,8 @@
 
     .card-actions {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 8px;
+      right: 8px;
     }
 
     .card-action {

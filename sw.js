@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chef5-dinner-planner-v8';
+const CACHE_NAME = 'chef5-dinner-planner-v9';
 const APP_SHELL = [
   './',
   './index.html',
