@@ -228,6 +228,13 @@
       white-space: nowrap;
     }
 
+    .section-actions {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
     .text-button {
       border: 0;
       border-radius: 999px;
@@ -255,6 +262,22 @@
       background: #ead8d0;
       color: #8a2e22;
       box-shadow: none;
+    }
+
+    .text-button.hidden {
+      display: none;
+    }
+
+    .text-button.compact {
+      padding: 9px 11px;
+    }
+
+    .recipe-search-panel {
+      margin-top: 20px;
+    }
+
+    .recipe-library-grid {
+      margin-top: 12px;
     }
 
     .recipe-grid {
@@ -297,7 +320,7 @@
     .recipe-card h3 {
       position: relative;
       z-index: 2;
-      max-width: calc(100% - 68px);
+      max-width: calc(100% - 100px);
       font-size: 12px;
       line-height: 1.18;
       letter-spacing: -.01em;
@@ -322,7 +345,7 @@
 
     .recipe-card:last-child:nth-child(odd) h3,
     .recipe-card:last-child:nth-child(odd) p {
-      max-width: calc(100% - 98px);
+      max-width: calc(100% - 122px);
     }
 
     .card-art {
@@ -384,6 +407,15 @@
 
     .card-action.danger {
       color: #8a2e22;
+    }
+
+    .card-action.favorite {
+      color: rgba(21, 19, 17, .56);
+    }
+
+    .card-action.favorite.is-active {
+      color: #111;
+      background: rgba(234, 216, 117, .82);
     }
 
     .feature-card {
@@ -1104,7 +1136,7 @@
             <div class="brand-mark" aria-hidden="true">
               <img src="./assets/icons/icon-192.png" alt="" />
             </div>
-            <button class="icon-button" type="button" aria-label="레시피 검색" data-view-jump="shopping">
+            <button class="icon-button" type="button" aria-label="레시피 검색" onclick="openRecipeLibrary(true, true)">
               <svg viewBox="0 0 24 24"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
             </button>
           </div>
@@ -1124,7 +1156,10 @@
               <h2>추천 레시피</h2>
               <small id="recipeCount">5개 메뉴</small>
             </div>
-            <button class="text-button soft" type="button" onclick="openRecipeEditor()">레시피 추가</button>
+            <div class="section-actions">
+              <button id="moreRecipesButton" class="text-button soft compact hidden" type="button" onclick="openRecipeLibrary(false, true)">더보기</button>
+              <button class="text-button soft compact" type="button" onclick="openRecipeEditor()">레시피 추가</button>
+            </div>
           </div>
 
           <div id="recipeGrid" class="recipe-grid"></div>
@@ -1144,6 +1179,37 @@
             </div>
             <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
           </article>
+        </section>
+
+        <section id="view-recipe-library" class="view" aria-label="전체 레시피">
+          <div class="topbar">
+            <button class="icon-button" type="button" aria-label="레시피로 돌아가기" data-view-jump="recipes">
+              <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="icon-button" type="button" aria-label="레시피 추가" onclick="openRecipeEditor()">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
+          </div>
+
+          <p class="label">Recipe library</p>
+          <h1><span class="line">모든 레시피를</span><span class="line"><strong>빠르게</strong> 찾아보세요.</span></h1>
+
+          <div class="recipe-search-panel">
+            <label class="search-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+              <input id="recipeSearchBox" type="search" placeholder="레시피 검색: 감바스, 파스타, 소스..." />
+            </label>
+          </div>
+
+          <div class="section-head">
+            <div>
+              <h2>전체 레시피</h2>
+              <small id="recipeLibraryCount">0개 메뉴</small>
+            </div>
+            <button class="text-button soft compact" type="button" onclick="openRecipeEditor()">레시피 추가</button>
+          </div>
+
+          <div id="recipeLibraryGrid" class="recipe-grid recipe-library-grid"></div>
         </section>
 
         <section id="view-shopping" class="view" aria-label="장보기">
@@ -1374,6 +1440,7 @@
     const state = JSON.parse(localStorage.getItem(stateKey) || '{}');
     let activeFilter = 'need';
     let recipeFilter = 'all';
+    let recipeSearchQuery = '';
     let recipes = [];
     let shoppingItems = [];
     let db;
@@ -1383,6 +1450,7 @@
 
     const dbName = 'dinnerPlannerContentDB';
     const dbVersion = 1;
+    const maxFavoriteRecipes = 6;
     const recipeTints = ['#b8c1f4', '#ead875', '#cfe6df', '#ecdcd3', '#df846e', '#879567'];
 
     function openDatabase() {
@@ -1432,13 +1500,15 @@
     async function seedDatabaseIfNeeded() {
       const seeded = await getFromStore('meta', 'seeded');
       if (seeded?.value) return;
-      await Promise.all(defaultRecipes.map(recipe => putInStore('recipes', recipe)));
+      await Promise.all(defaultRecipes.map(recipe => putInStore('recipes', { ...recipe, favorite: true })));
       await Promise.all(defaultShoppingItems.map(item => putInStore('shoppingItems', item)));
       await putInStore('meta', { key: 'seeded', value: true, seededAt: new Date().toISOString() });
     }
 
     async function loadContent() {
-      recipes = (await getAllFromStore('recipes')).sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ko'));
+      recipes = (await getAllFromStore('recipes'))
+        .map(recipe => ({ ...recipe, favorite: recipe.favorite !== false }))
+        .sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ko'));
       shoppingItems = (await getAllFromStore('shoppingItems')).sort((a, b) => (a.cat || '').localeCompare(b.cat || '', 'ko') || (a.name || '').localeCompare(b.name || '', 'ko'));
       if (recipeFilter !== 'all' && !recipes.some(recipe => recipe.id === recipeFilter)) recipeFilter = 'all';
     }
@@ -1446,6 +1516,7 @@
     async function refreshContent() {
       await loadContent();
       renderRecipes();
+      renderRecipeLibrary();
       renderShopping();
       updateStats();
     }
@@ -1507,8 +1578,9 @@
 
     function setView(name) {
       document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === `view-${name}`));
-      document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
+      document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === (name === 'recipe-library' ? 'recipes' : name)));
       if (name === 'shopping') renderShopping();
+      if (name === 'recipe-library') renderRecipeLibrary();
       if (window.matchMedia('(max-width: 480px)').matches) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -1516,15 +1588,26 @@
       }
     }
 
-    function renderRecipes() {
+    function isRecipeFavorite(recipe) {
+      return recipe.favorite !== false;
+    }
+
+    function visibleFavoriteRecipes() {
+      return recipes.filter(isRecipeFavorite);
+    }
+
+    function renderRecipeCards(list) {
       const art = ['steam', 'pot', 'shrimp', 'noodle', 'sauce'];
-      document.getElementById('recipeGrid').innerHTML = recipes.map((recipe, index) => `
+      return list.map((recipe, index) => `
         <article class="recipe-card" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">
           <button class="recipe-open" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기"></button>
           <h3>${escapeHtml(recipe.title)}</h3>
           <p>${escapeHtml(recipe.short)}</p>
           ${icons[art[index % art.length]]}
           <div class="card-actions">
+            <button class="card-action favorite ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 즐겨찾기 ${isRecipeFavorite(recipe) ? '해제' : '추가'}">
+              <svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2 6.4 20.2 7.5 14 3 9.6l6.2-.9L12 3Z"/></svg>
+            </button>
             <button class="card-action" type="button" onclick="openRecipeEditor(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 수정">
               <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
             </button>
@@ -1535,7 +1618,62 @@
           <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
         </article>
       `).join('');
-      document.getElementById('recipeCount').textContent = `${recipes.length}개 메뉴`;
+    }
+
+    function renderRecipes() {
+      const favorites = visibleFavoriteRecipes();
+      const visible = favorites.slice(0, maxFavoriteRecipes);
+      const grid = document.getElementById('recipeGrid');
+      grid.innerHTML = visible.length
+        ? renderRecipeCards(visible)
+        : '<div class="empty">즐겨찾기한 레시피가 없습니다. 더보기에서 별표를 눌러 메인에 표시할 레시피를 고르세요.</div>';
+      document.getElementById('recipeCount').textContent = `${visible.length}/${favorites.length}개 즐겨찾기`;
+      document.getElementById('moreRecipesButton')?.classList.toggle('hidden', recipes.length <= maxFavoriteRecipes && favorites.length <= maxFavoriteRecipes);
+    }
+
+    function filteredRecipesForLibrary() {
+      const query = recipeSearchQuery.trim().toLowerCase();
+      if (!query) return recipes;
+      return recipes.filter(recipe => {
+        const text = [
+          recipe.title,
+          recipe.short,
+          recipe.desc,
+          recipe.time,
+          recipe.serving,
+          recipe.level,
+          ...(recipe.ingredients || []),
+          ...(recipe.steps || [])
+        ].join(' ').toLowerCase();
+        return text.includes(query);
+      });
+    }
+
+    function renderRecipeLibrary() {
+      const grid = document.getElementById('recipeLibraryGrid');
+      if (!grid) return;
+      const input = document.getElementById('recipeSearchBox');
+      if (input && input.value !== recipeSearchQuery) input.value = recipeSearchQuery;
+      const list = filteredRecipesForLibrary();
+      grid.innerHTML = list.length
+        ? renderRecipeCards(list)
+        : '<div class="empty">검색 결과가 없습니다.</div>';
+      document.getElementById('recipeLibraryCount').textContent = `${list.length}/${recipes.length}개 메뉴`;
+    }
+
+    function openRecipeLibrary(focusSearch = false, resetSearch = false) {
+      if (resetSearch) recipeSearchQuery = '';
+      setView('recipe-library');
+      if (focusSearch) {
+        setTimeout(() => document.getElementById('recipeSearchBox')?.focus(), 80);
+      }
+    }
+
+    async function toggleRecipeFavorite(id) {
+      const recipe = recipes.find(item => item.id === id);
+      if (!recipe) return;
+      await putInStore('recipes', { ...recipe, favorite: !isRecipeFavorite(recipe) });
+      await refreshContent();
     }
 
     function openRecipe(id) {
@@ -1728,6 +1866,7 @@
         time: '',
         serving: '',
         level: '쉬움',
+        favorite: true,
         desc: '',
         ingredients: [],
         steps: [],
@@ -1765,6 +1904,9 @@
             </div>
           </div>
           <div class="form-row">
+            <label class="check"><input type="checkbox" name="favorite" ${isRecipeFavorite(recipe) ? 'checked' : ''}>메인 화면 즐겨찾기에 표시</label>
+          </div>
+          <div class="form-row">
             <label for="recipeDesc">상세 설명</label>
             <textarea id="recipeDesc" name="desc" placeholder="레시피 소개">${escapeHtml(recipe.desc)}</textarea>
           </div>
@@ -1800,6 +1942,7 @@
         time: form.get('time').trim(),
         serving: form.get('serving').trim(),
         level: form.get('level').trim(),
+        favorite: form.has('favorite'),
         desc: form.get('desc').trim(),
         ingredients: textToList(form.get('ingredients')),
         steps: textToList(form.get('steps')),
@@ -2031,6 +2174,10 @@
     });
 
     document.getElementById('searchBox').addEventListener('input', renderShopping);
+    document.getElementById('recipeSearchBox').addEventListener('input', event => {
+      recipeSearchQuery = event.target.value;
+      renderRecipeLibrary();
+    });
 
     window.addEventListener('beforeinstallprompt', event => {
       event.preventDefault();
