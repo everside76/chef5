@@ -1053,6 +1053,27 @@
     .poster-block li { margin: 7px 0; color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
     .poster-block p { color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
 
+    .ing-state {
+      display: inline-block;
+      margin-left: 6px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10.5px;
+      font-weight: 800;
+      vertical-align: 1px;
+      white-space: nowrap;
+    }
+
+    .ing-state.need { background: var(--accent-soft); color: var(--accent-press); }
+    .ing-state.owned { background: var(--mint-soft); color: #157a5f; }
+    .ing-state.bought { background: var(--amber-soft); color: #b06a12; }
+
+    .poster-block .block-action {
+      width: 100%;
+      margin-top: 12px;
+      background: var(--surface);
+    }
+
     /* ---------- editor ---------- */
     .editor-form { display: grid; gap: 13px; }
     .form-row { display: grid; gap: 7px; }
@@ -1256,12 +1277,12 @@
           </article>
 
           <article class="utility-card">
-            <h3>홈 화면에 설치하고 더 편하게</h3>
-            <p class="mini-line">보유 재료, 구매 완료, 타임라인이 이 기기에 저장됩니다.</p>
+            <h3>스마트폰·PC에 설치하고 더 편하게</h3>
+            <p class="mini-line">보유 재료, 구매 완료, 타임라인이 이 기기에 저장됩니다. 설치 중 보안 경고가 표시되면 개인 제작 앱이라 그런 것이니 무시하고 진행하셔도 됩니다.</p>
             <div class="utility-actions">
               <button id="installAppButton" class="pill-button" type="button" onclick="handleInstallClick()">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-                홈화면에 설치
+                스마트폰·PC에 설치
               </button>
               <button id="wakeLockButton" class="pill-button secondary" type="button" onclick="toggleWakeLock()">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="m4.22 4.22 2.12 2.12"/><path d="m17.66 17.66 2.12 2.12"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.22 19.78 2.12-2.12"/><path d="m17.66 6.34 2.12-2.12"/><circle cx="12" cy="12" r="4"/></svg>
@@ -1659,6 +1680,90 @@
       return value.split('\n').map(item => item.trim()).filter(Boolean);
     }
 
+    // ---------- 재료 ↔ 장보기 연동 ----------
+    const qtyWords = ['약간', '소량', '조금', '내외', '이상', '이하', '적당량', '넉넉히'];
+
+    // "새우 20마리" → { name: '새우', qty: '20마리' }
+    function parseIngredientLine(line) {
+      const tokens = String(line).trim().split(/\s+/);
+      const qtyTokens = [];
+      while (tokens.length > 1) {
+        const last = tokens[tokens.length - 1];
+        if (/\d/.test(last) || qtyWords.includes(last)) qtyTokens.unshift(tokens.pop());
+        else break;
+      }
+      return { name: tokens.join(' '), qty: qtyTokens.join(' ') };
+    }
+
+    function normalizeIngredientName(name) {
+      return String(name).toLowerCase().replace(/\s+/g, '');
+    }
+
+    const categoryHints = [
+      ['육류', ['삼겹', '우삼겹', '소고기', '돼지', '닭', '오리', '베이컨', '햄', '고기']],
+      ['해산물', ['새우', '생선', '홍합', '바지락', '조개', '오징어', '문어', '연어', '참치', '굴', '멸치']],
+      ['채소', ['양파', '마늘', '감자', '당근', '파프리카', '고추', '오이', '깻잎', '상추', '버섯', '토마토', '셀러리', '대파', '쪽파', '부추', '시금치', '애호박', '브로콜리', '양배추', '배추']],
+      ['과일', ['레몬', '오렌지', '사과', '라임', '자몽', '포도', '딸기']],
+      ['면/빵', ['파스타', '카펠리니', '스파게티', '국수', '라면', '우동', '바게트', '식빵', '빵', '또띠아']],
+      ['소스/양념', ['소금', '후추', '설탕', '간장', '된장', '고추장', '식초', '오일', '기름', '버터', '소스', '가루', '와인', '주스', '머스터드', '마요네즈', '케첩', '시럽', '아몬드', '페페론치노', '향신료', '깨']]
+    ];
+
+    function guessCategory(name) {
+      for (const [cat, words] of categoryHints) {
+        if (words.some(word => name.includes(word))) return cat;
+      }
+      return '기타';
+    }
+
+    // 레시피 저장 시 재료 목록을 장보기 아이템과 동기화한다.
+    // 이름이 같은 아이템이 있으면 연결하고, 없으면 자동 생성(auto)하며,
+    // 레시피에서 빠진 재료는 연결을 해제한다(자동 생성 항목은 다른 연결이 없으면 삭제).
+    async function syncRecipeIngredients(recipe) {
+      const parsed = (recipe.ingredients || []).map(parseIngredientLine).filter(part => part.name);
+      const items = await getAllFromStore('shoppingItems');
+      const keptIds = new Set();
+
+      for (const ing of parsed) {
+        const key = normalizeIngredientName(ing.name);
+        const existing = items.find(item => normalizeIngredientName(item.name) === key);
+        if (existing) {
+          keptIds.add(existing.id);
+          const dishes = existing.dishes || [];
+          const next = { ...existing };
+          let changed = false;
+          if (!dishes.includes(recipe.id)) { next.dishes = [...dishes, recipe.id]; changed = true; }
+          if (!existing.qty && ing.qty) { next.qty = ing.qty; changed = true; }
+          if (changed) await putInStore('shoppingItems', next);
+          Object.assign(existing, next);
+        } else {
+          const newItem = {
+            id: createId('item'),
+            cat: guessCategory(ing.name),
+            name: ing.name,
+            qty: ing.qty,
+            use: recipe.title,
+            dishes: [recipe.id],
+            auto: true
+          };
+          items.push(newItem);
+          keptIds.add(newItem.id);
+          await putInStore('shoppingItems', newItem);
+        }
+      }
+
+      for (const item of items) {
+        if (keptIds.has(item.id) || !(item.dishes || []).includes(recipe.id)) continue;
+        const dishes = item.dishes.filter(dishId => dishId !== recipe.id);
+        if (!dishes.length && item.auto) {
+          await deleteFromStore('shoppingItems', item.id);
+          delete state[item.id];
+        } else {
+          await putInStore('shoppingItems', { ...item, dishes });
+        }
+      }
+      saveState();
+    }
+
     const dishIcons = {
       steam: '<svg class="dish" viewBox="0 0 80 64"><path d="M13 52c12-15 28-15 40 0"/><path d="M24 16c-9 10 8 11-1 22"/><path d="M42 11c-11 12 10 13-1 27"/><path d="M59 18c-8 8 7 10-1 20"/></svg>',
       pot: '<svg class="dish" viewBox="0 0 80 64"><path d="M17 29h46l-5 22H22z"/><path d="M25 25h30"/><path d="M30 20h20"/><path d="M13 34h7"/><path d="M60 34h7"/></svg>',
@@ -1847,6 +1952,29 @@
       await refreshContent();
     }
 
+    function ingredientStatusHtml(recipe) {
+      const linked = shoppingItems.filter(item => (item.dishes || []).includes(recipe.id));
+      return (recipe.ingredients || []).map(line => {
+        const { name } = parseIngredientLine(line);
+        const item = linked.find(entry => normalizeIngredientName(entry.name) === normalizeIngredientName(name));
+        let chip = '';
+        if (item) {
+          const itemState = getItemState(item.id);
+          const label = itemState.bought ? '구매 완료' : itemState.owned ? '집에 있음' : '필요';
+          const cls = itemState.bought ? 'bought' : itemState.owned ? 'owned' : 'need';
+          chip = `<span class="ing-state ${cls}">${label}</span>`;
+        }
+        return `<li>${escapeHtml(line)}${chip}</li>`;
+      }).join('');
+    }
+
+    function goShoppingForRecipe(id) {
+      closeRecipe();
+      recipeFilter = id;
+      activeFilter = 'all';
+      setView('shopping');
+    }
+
     function openRecipe(id) {
       const recipe = recipes.find(item => item.id === id);
       if (!recipe) return;
@@ -1868,7 +1996,8 @@
           <div class="poster-body">
             <section class="poster-block">
               <h3>${servingIcon}재료</h3>
-              <ul>${(recipe.ingredients || []).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+              <ul>${ingredientStatusHtml(recipe)}</ul>
+              <button class="text-button soft block-action" type="button" onclick="goShoppingForRecipe(${jsAttr(recipe.id)})">이 레시피 재료 장보기</button>
             </section>
             <section class="poster-block">
               <h3>${clockIcon}조리 방법</h3>
@@ -1916,7 +2045,7 @@
       } else {
         button.classList.remove('is-installed');
         button.disabled = false;
-        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>홈화면에 설치';
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>스마트폰·PC에 설치';
       }
     }
 
@@ -1946,7 +2075,7 @@
           ? ['브라우저 메뉴를 엽니다.', '"앱 설치" 또는 "홈 화면에 추가"를 선택합니다.', '설치를 확인합니다.']
           : ['브라우저 주소창 오른쪽의 설치 아이콘을 확인합니다.', '설치 아이콘이 없다면 메뉴에서 "앱 설치"를 찾습니다.', '지원하지 않는 브라우저에서는 북마크로 저장해 주세요.'];
 
-      openEditor('홈화면 설치 안내', `
+      openEditor('앱 설치 안내', `
         <div class="poster-block">
           <h3>설치 버튼이 바로 뜨지 않을 때</h3>
           <p>브라우저나 기기 정책에 따라 설치 팝업이 자동으로 제공되지 않을 수 있습니다.</p>
@@ -1954,6 +2083,10 @@
         <div class="poster-block">
           <h3>설치 방법</h3>
           <ol>${guide.map(step => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
+        </div>
+        <div class="poster-block">
+          <h3>보안 경고가 표시될 때</h3>
+          <p>개인이 만든 웹앱이라 브라우저나 기기에 따라 "알 수 없는 앱" 같은 보안 경고가 나올 수 있습니다. 이 앱은 광고나 추적 없이 데이터를 내 기기와 내 계정에만 저장하므로, 경고는 무시하고 계속 진행하셔도 됩니다.</p>
         </div>
         <button class="text-button" type="button" onclick="closeEditor()">확인</button>
       `);
@@ -1979,7 +2112,7 @@
         <div class="poster-block">
           <h3>사용 팁</h3>
           <ol>
-            <li>앱을 홈화면에 설치한 뒤 다시 열면 지원되는 경우가 많습니다.</li>
+            <li>앱을 스마트폰이나 PC에 설치한 뒤 다시 열면 지원되는 경우가 많습니다.</li>
             <li>버튼을 켠 뒤에는 이 화면이 보이는 동안 자동 잠금을 최대한 막습니다.</li>
             <li>배터리 절약 모드나 브라우저 정책에 따라 자동으로 해제될 수 있습니다.</li>
           </ol>
@@ -2084,8 +2217,8 @@
             <textarea id="recipeDesc" name="desc" placeholder="레시피 소개">${escapeHtml(recipe.desc)}</textarea>
           </div>
           <div class="form-row">
-            <label for="recipeIngredients">재료 목록</label>
-            <textarea id="recipeIngredients" name="ingredients" placeholder="한 줄에 하나씩 입력">${escapeHtml(listToText(recipe.ingredients))}</textarea>
+            <label for="recipeIngredients">재료 목록 (저장하면 장보기와 자동 연동)</label>
+            <textarea id="recipeIngredients" name="ingredients" placeholder="한 줄에 하나씩: 이름 수량 (예: 새우 20마리)">${escapeHtml(listToText(recipe.ingredients))}</textarea>
           </div>
           <div class="form-row">
             <label for="recipeSteps">조리 방법</label>
@@ -2122,6 +2255,7 @@
         key: form.get('key').trim()
       };
       await putInStore('recipes', recipe);
+      await syncRecipeIngredients(recipe);
       closeEditor();
       await refreshContent();
     }
@@ -2132,10 +2266,15 @@
       if (!confirm(`'${recipe.title}' 레시피를 삭제할까요? 연결된 장보기 항목은 삭제하지 않고 연결만 해제합니다.`)) return;
       await deleteFromStore('recipes', id);
       const linkedItems = shoppingItems.filter(item => (item.dishes || []).includes(id));
-      await Promise.all(linkedItems.map(item => putInStore('shoppingItems', {
-        ...item,
-        dishes: (item.dishes || []).filter(dishId => dishId !== id)
-      })));
+      await Promise.all(linkedItems.map(item => {
+        const dishes = (item.dishes || []).filter(dishId => dishId !== id);
+        if (!dishes.length && item.auto) {
+          delete state[item.id];
+          return deleteFromStore('shoppingItems', item.id);
+        }
+        return putInStore('shoppingItems', { ...item, dishes });
+      }));
+      saveState();
       closeRecipe();
       closeEditor();
       await refreshContent();
