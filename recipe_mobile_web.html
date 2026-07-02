@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>저녁 준비 모바일 플래너</title>
   <meta name="description" content="저녁 메뉴, 장보기, 조리 순서를 모바일에서 확인하고 체크하는 설치형 웹앱입니다." />
-  <meta name="theme-color" content="#ead7cc" />
+  <meta name="theme-color" content="#f3f2fb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="저녁 플래너" />
@@ -14,27 +14,32 @@
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" />
   <style>
     :root {
-      --page: #ead7cc;
-      --app: #f7f4f4;
-      --app-2: #f1dfd5;
-      --panel: #ffffff;
-      --panel-soft: #f4e3da;
-      --ink: #151311;
-      --muted: #7d756f;
-      --line: rgba(30, 24, 20, .08);
-      --lavender: #b8c1f4;
-      --mint: #cfe6df;
-      --butter: #ead875;
-      --peach: #ecdcd3;
-      --sage: #879567;
-      --coral: #df846e;
-      --blue: #89b8e8;
-      --shadow: 0 24px 72px rgba(87, 63, 48, .23);
-      --soft-shadow: 0 16px 36px rgba(67, 48, 38, .11);
-      --radius-xl: 34px;
-      --radius-lg: 25px;
+      --page: #e7e6f4;
+      --app-top: #f4f3fc;
+      --app-mid: #f7f6fb;
+      --app-bot: #eef0fb;
+      --surface: #ffffff;
+      --surface-2: #f5f5fb;
+      --ink: #1b1c30;
+      --ink-soft: #3a3c55;
+      --muted: #7a7c93;
+      --line: rgba(27, 28, 48, .08);
+      --accent: #6c5ce7;
+      --accent-press: #5a49d6;
+      --accent-soft: #ece9fd;
+      --mint: #2fc39b;
+      --mint-soft: #dbf5ec;
+      --amber: #ff9f43;
+      --amber-soft: #fff0dc;
+      --rose: #ff7a90;
+      --shadow-card: 0 18px 40px rgba(58, 52, 108, .10);
+      --shadow-soft: 0 10px 26px rgba(58, 52, 108, .08);
+      --shadow-float: 0 18px 44px rgba(48, 42, 96, .22);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
       --radius-md: 18px;
-      --nav-h: 78px;
+      --radius-sm: 14px;
+      --nav-h: 76px;
     }
 
     * { box-sizing: border-box; }
@@ -48,6 +53,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
       word-break: keep-all;
       line-break: strict;
+      -webkit-font-smoothing: antialiased;
     }
 
     body {
@@ -58,21 +64,25 @@
     }
 
     button,
-    input {
+    input,
+    textarea,
+    select {
       font: inherit;
+      color: inherit;
     }
 
     button {
       -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
     }
 
     .phone-shell {
-      width: min(390px, 100%);
-      height: min(844px, calc(100vh - 48px));
-      border-radius: 38px;
-      background: linear-gradient(180deg, #fbfbff 0%, var(--app) 45%, var(--app-2) 100%);
-      border: 2px solid rgba(255, 255, 255, .8);
-      box-shadow: var(--shadow);
+      width: min(392px, 100%);
+      height: min(848px, calc(100vh - 48px));
+      border-radius: 40px;
+      background: linear-gradient(180deg, var(--app-top) 0%, var(--app-mid) 46%, var(--app-bot) 100%);
+      border: 2px solid rgba(255, 255, 255, .9);
+      box-shadow: 0 30px 80px rgba(66, 58, 120, .28);
       overflow: hidden;
       position: relative;
     }
@@ -85,536 +95,139 @@
     }
 
     .screen {
-      padding: 26px 14px calc(var(--nav-h) + 22px);
+      padding: 22px 18px calc(var(--nav-h) + 24px);
       min-height: 0;
       overflow-y: auto;
       scrollbar-width: none;
     }
 
-    .screen::-webkit-scrollbar {
+    .screen::-webkit-scrollbar { display: none; }
+
+    .view {
       display: none;
+      animation: enter .22s ease;
     }
 
+    .view.active { display: block; }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- top bar ---------- */
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 2px;
-      margin-bottom: 26px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      overflow: hidden;
-      flex: 0 0 auto;
-      background: #ecdcd3;
-      box-shadow: 0 10px 22px rgba(15, 13, 11, .14);
+    .brand-pill {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 12px 6px 6px;
+      border-radius: 999px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
     }
 
-    .brand-mark img {
-      width: 100%;
-      height: 100%;
+    .brand-pill img {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
       display: block;
       object-fit: cover;
     }
 
+    .brand-pill b {
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+
+    .brand-pill span {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 1px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+
     .icon-button {
-      width: 34px;
-      height: 34px;
+      width: 42px;
+      height: 42px;
       border: 0;
-      border-radius: 50%;
-      color: #171412;
-      background: rgba(255, 255, 255, .74);
+      border-radius: 15px;
+      color: var(--ink);
+      background: var(--surface);
       display: grid;
       place-items: center;
-      box-shadow: 0 8px 18px rgba(90, 63, 47, .08);
+      box-shadow: var(--shadow-soft);
     }
 
-    .view {
-      display: none;
-      animation: enter .18s ease;
+    .icon-button.ghost {
+      background: rgba(255, 255, 255, .68);
+      box-shadow: none;
     }
 
-    .view.active {
-      display: block;
-    }
+    .icon-button svg { width: 20px; height: 20px; }
 
-    @keyframes enter {
-      from { opacity: .4; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .label {
-      margin: 0 0 7px;
-      color: var(--muted);
+    /* ---------- headline ---------- */
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent);
       font-size: 12px;
-      line-height: 1;
+      font-weight: 800;
+      letter-spacing: .01em;
     }
 
     h1,
     h2,
     h3,
-    p {
-      margin: 0;
-    }
+    p { margin: 0; }
 
     h1 {
-      max-width: 332px;
-      font-size: 27px;
-      line-height: 1.08;
+      font-size: 30px;
+      line-height: 1.12;
       letter-spacing: -0.02em;
-      font-weight: 800;
-    }
-
-    h1 .line {
-      display: block;
-    }
-
-    h1 strong,
-    h2 strong {
-      font-weight: 900;
-    }
-
-    .quick-note {
-      margin-top: 22px;
-      height: 54px;
-      border-radius: 19px;
-      background: #ecd9cf;
-      display: grid;
-      grid-template-columns: 1fr 38px;
-      align-items: center;
-      padding: 0 8px 0 16px;
-      color: #87766d;
-      font-size: 13px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
-    }
-
-    .quick-note button {
-      width: 34px;
-      height: 34px;
-      border: 0;
-      border-radius: 50%;
-      background: transparent;
-      display: grid;
-      place-items: center;
+      font-weight: 850;
       color: var(--ink);
     }
 
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 28px 0 12px;
-      padding: 0 2px;
-      white-space: nowrap;
-    }
+    h1 .accent { color: var(--accent); }
 
-    .section-head > div {
-      min-width: 0;
-    }
-
-    .section-head h2 {
-      font-size: 13px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .section-head small {
+    .lead {
+      margin-top: 9px;
+      max-width: 300px;
       color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .section-actions {
-      display: flex;
-      gap: 7px;
-      align-items: center;
-      flex: 0 0 auto;
-    }
-
-    .text-button {
-      border: 0;
-      border-radius: 999px;
-      background: #151311;
-      color: #fff;
-      padding: 9px 12px;
-      font-size: 12px;
-      font-weight: 900;
-      white-space: nowrap;
-      box-shadow: 0 10px 20px rgba(15, 13, 11, .12);
-      cursor: pointer;
-    }
-
-    .text-button.soft {
-      background: rgba(255,255,255,.82);
-      color: #27231f;
-      box-shadow: 0 8px 18px rgba(67, 48, 38, .08);
-    }
-
-    .text-button.danger {
-      background: #ead8d0;
-      color: #8a2e22;
-      box-shadow: none;
-    }
-
-    .text-button.hidden {
-      display: none;
-    }
-
-    .text-button.compact {
-      padding: 9px 11px;
-    }
-
-    .recipe-search-panel {
-      margin-top: 20px;
-    }
-
-    .recipe-library-grid {
-      margin-top: 12px;
-    }
-
-    .recipe-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      border-radius: 0;
-      overflow: visible;
-    }
-
-    .recipe-card {
-      min-height: 154px;
-      border: 0;
-      border-radius: 20px;
-      padding: 0;
-      color: var(--ink);
-      text-align: left;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      isolation: isolate;
-      box-shadow: 0 10px 26px rgba(66, 46, 35, .08);
-    }
-
-    .recipe-card:active {
-      transform: scale(.985);
-    }
-
-    .recipe-open {
-      position: absolute;
-      inset: 0 0 37px;
-      border: 0;
-      background: transparent;
-      padding: 14px;
-      color: inherit;
-      text-align: left;
-      cursor: pointer;
-      z-index: 1;
-    }
-
-    .recipe-card-copy {
-      position: relative;
-      z-index: 2;
-      padding: 14px 14px 6px;
-      min-height: 86px;
-    }
-
-    .recipe-card h3 {
-      position: relative;
-      z-index: 2;
-      max-width: 100%;
-      font-size: 15px;
-      line-height: 1.16;
-      letter-spacing: 0;
-      font-weight: 850;
-      min-height: auto;
-      word-break: keep-all;
-      overflow-wrap: anywhere;
-    }
-
-    .recipe-card p {
-      position: relative;
-      z-index: 2;
-      max-width: 100%;
-      margin-top: 8px;
-      color: rgba(21, 19, 17, .62);
-      font-size: 11px;
-      line-height: 1.32;
-      font-weight: 700;
-      word-break: keep-all;
-    }
-
-    .recipe-card:last-child:nth-child(odd) {
-      grid-column: span 2;
-      min-height: 132px;
-    }
-
-    .recipe-card:last-child:nth-child(odd) h3,
-    .recipe-card:last-child:nth-child(odd) p {
-      max-width: 100%;
-    }
-
-    .card-art {
-      position: absolute;
-      right: 14px;
-      bottom: 48px;
-      width: 54px;
-      height: 44px;
-      color: rgba(20, 17, 14, .78);
-      opacity: .48;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .open-dot {
-      position: absolute;
-      right: 8px;
-      bottom: 10px;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,.28);
-      color: rgba(21, 19, 17, .78);
-      z-index: 2;
-    }
-
-    .card-actions,
-    .inline-actions {
-      display: flex;
-      gap: 6px;
-      position: relative;
-      z-index: 3;
-    }
-
-    .card-actions {
-      position: relative;
-      inset: auto;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 1px;
-      margin-top: auto;
-      background: rgba(21, 19, 17, .08);
-      z-index: 3;
-    }
-
-    .card-action {
-      width: 100%;
-      height: 37px;
-      border: 0;
-      border-radius: 0;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,.36);
-      color: #181511;
-      cursor: pointer;
-    }
-
-    .card-action svg {
-      width: 15px;
-      height: 15px;
-    }
-
-    .card-action.danger {
-      color: #8a2e22;
-    }
-
-    .card-action.favorite {
-      color: rgba(21, 19, 17, .56);
-    }
-
-    .card-action.favorite.is-active {
-      color: #111;
-      background: rgba(234, 216, 117, .82);
-    }
-
-    .feature-card {
-      margin-top: 4px;
-      min-height: 77px;
-      border-radius: 25px;
-      background: rgba(255,255,255,.86);
-      padding: 12px 14px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-card h3 {
-      max-width: 250px;
       font-size: 13px;
-      line-height: 1.22;
-      font-weight: 850;
-    }
-
-    .feature-card .mini-line {
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.38;
-    }
-
-    .install-button {
-      margin-top: 12px;
-      width: fit-content;
-      border: 0;
-      border-radius: 999px;
-      background: #151311;
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 10px 13px;
-      font-size: 12px;
-      font-weight: 900;
-      box-shadow: 0 12px 24px rgba(15, 13, 11, .16);
-      cursor: pointer;
-    }
-
-    .utility-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .utility-actions .install-button {
-      margin-top: 0;
-    }
-
-    .install-button svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .install-button.is-installed {
-      background: #879567;
-      cursor: default;
-    }
-
-    .install-button.secondary {
-      background: rgba(255,255,255,.92);
-      color: #151311;
-      box-shadow: 0 10px 20px rgba(15, 13, 11, .08);
-    }
-
-    .install-button.secondary.is-active {
-      background: #879567;
-      color: #fff;
-    }
-
-    .bubble-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-
-    .bubble-row::-webkit-scrollbar {
-      display: none;
-    }
-
-    .bubble {
-      flex: 0 0 auto;
-      min-width: 48px;
-      height: 48px;
-      border: 0;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      color: #3a332f;
-      font-size: 11px;
-      line-height: 1.18;
-      font-weight: 800;
-      box-shadow: 0 8px 18px rgba(81, 60, 50, .08);
-    }
-
-    .progress-panel {
-      margin-top: 12px;
-      background: rgba(255,255,255,.9);
-      border-radius: 28px;
-      padding: 18px 16px 16px;
-      box-shadow: var(--soft-shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .progress-panel h3 {
-      font-size: 12px;
-      line-height: 1;
-      font-weight: 850;
-    }
-
-    .progress-body {
-      display: grid;
-      grid-template-columns: 1fr 112px;
-      gap: 12px;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .percent {
-      font-size: 54px;
-      line-height: .9;
-      letter-spacing: -.04em;
+      line-height: 1.5;
       font-weight: 500;
     }
 
-    .percent span {
-      font-size: 24px;
-      letter-spacing: 0;
-    }
-
-    .progress-copy {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.38;
-    }
-
-    .dot-meter {
-      display: grid;
-      grid-template-columns: repeat(5, 14px);
-      gap: 5px;
-      align-content: center;
-    }
-
-    .dot-meter span {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #ebe7e6;
-    }
-
-    .dot-meter span.done {
-      background: #b6d7d1;
-    }
-
-    .toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 4;
-      margin: 22px -14px 14px;
-      padding: 10px 14px;
-      background: linear-gradient(180deg, rgba(247,244,244,.96), rgba(247,244,244,.86));
-      backdrop-filter: blur(12px);
-    }
-
+    /* ---------- search ---------- */
     .search-wrap {
-      height: 48px;
+      height: 50px;
       display: grid;
       grid-template-columns: 22px 1fr;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
-      border-radius: 18px;
-      background: #fff;
-      padding: 0 14px;
-      box-shadow: 0 10px 24px rgba(67, 48, 38, .08);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 0 15px;
+      box-shadow: var(--shadow-soft);
+      color: var(--muted);
     }
+
+    .search-wrap svg { width: 20px; height: 20px; }
 
     .search-wrap input {
       width: 100%;
@@ -623,62 +236,548 @@
       outline: 0;
       background: transparent;
       color: var(--ink);
-      font-size: 13px;
+      font-size: 13.5px;
+      font-weight: 600;
     }
 
-    .chips {
-      display: flex;
+    .search-wrap input::placeholder { color: var(--muted); font-weight: 500; }
+
+    button.search-wrap {
+      width: 100%;
+      text-align: left;
+      border: 0;
+    }
+
+    button.search-wrap span {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* ---------- category tiles ---------- */
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .tile {
+      border: 0;
+      border-radius: 20px;
+      background: var(--surface);
+      padding: 13px 6px 11px;
+      display: grid;
+      justify-items: center;
       gap: 8px;
-      margin-top: 10px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tile:active { transform: scale(.96); }
+
+    .tile .glyph {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+    }
+
+    .tile .glyph svg { width: 22px; height: 22px; }
+
+    .tile b {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--ink-soft);
+      letter-spacing: -.01em;
+    }
+
+    /* ---------- section header ---------- */
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 26px 2px 12px;
+    }
+
+    .section-head h2 {
+      font-size: 17px;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .section-head small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .view-all {
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      padding: 4px 2px;
+    }
+
+    /* ---------- recommend carousel ---------- */
+    .carousel {
+      display: flex;
+      gap: 13px;
       overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 2px 2px 6px;
+      margin: 0 -18px;
+      padding-left: 18px;
+      padding-right: 18px;
       scrollbar-width: none;
     }
 
-    .chips::-webkit-scrollbar {
-      display: none;
+    .carousel::-webkit-scrollbar { display: none; }
+
+    .hero-card {
+      scroll-snap-align: start;
+      flex: 0 0 78%;
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+      text-align: left;
+      border: 0;
+      padding: 0;
+      color: var(--ink);
+      display: block;
     }
+
+    .hero-card:active { transform: scale(.985); }
+
+    .hero-art {
+      height: 120px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .hero-art svg.dish {
+      width: 78px;
+      height: 62px;
+      color: rgba(27, 28, 48, .42);
+    }
+
+    .hero-fav {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .82);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      box-shadow: 0 6px 14px rgba(40, 34, 80, .14);
+      z-index: 2;
+    }
+
+    .hero-fav svg { width: 17px; height: 17px; }
+
+    .hero-fav.is-active {
+      color: #fff;
+      background: var(--amber);
+      fill: #fff;
+    }
+
+    .hero-fav.is-active svg { fill: #fff; }
+
+    .hero-body { padding: 13px 15px 15px; }
+
+    .hero-body h3 {
+      font-size: 15.5px;
+      font-weight: 850;
+      line-height: 1.2;
+      letter-spacing: -.01em;
+    }
+
+    .hero-body p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 11px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--ink-soft);
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .meta-chip svg { width: 13px; height: 13px; color: var(--accent); }
+
+    /* ---------- progress card ---------- */
+    .progress-panel {
+      margin-top: 14px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-panel::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108, 92, 231, .55), transparent 70%);
+    }
+
+    .progress-panel h3 { font-size: 13px; font-weight: 800; opacity: .82; }
+
+    .progress-body {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .percent {
+      font-size: 46px;
+      line-height: .9;
+      letter-spacing: -.04em;
+      font-weight: 800;
+    }
+
+    .percent span { font-size: 20px; opacity: .8; }
+
+    .progress-copy {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, .7);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .ring {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--mint) var(--ring, 0%), rgba(255,255,255,.14) 0);
+    }
+
+    .ring b {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--ink);
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .progress-panel .go-shop {
+      margin-top: 14px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+      height: 46px;
+      font-size: 13px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 12px 24px rgba(108, 92, 231, .38);
+    }
+
+    .progress-panel .go-shop svg { width: 17px; height: 17px; }
+
+    /* ---------- utility card ---------- */
+    .utility-card {
+      margin-top: 14px;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .utility-card h3 { font-size: 14px; font-weight: 850; line-height: 1.3; }
+
+    .utility-card .mini-line {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .utility-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 13px;
+    }
+
+    .pill-button {
+      border: 0;
+      border-radius: 13px;
+      background: var(--accent);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 14px;
+      font-size: 12.5px;
+      font-weight: 800;
+      box-shadow: 0 12px 22px rgba(108, 92, 231, .3);
+    }
+
+    .pill-button svg { width: 16px; height: 16px; }
+
+    .pill-button.secondary {
+      background: var(--surface-2);
+      color: var(--ink);
+      box-shadow: none;
+    }
+
+    .pill-button.secondary.is-active {
+      background: var(--mint-soft);
+      color: #157a5f;
+    }
+
+    .pill-button.is-installed {
+      background: var(--mint-soft);
+      color: #157a5f;
+      box-shadow: none;
+    }
+
+    /* ---------- recipe list ---------- */
+    .chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .chips::-webkit-scrollbar { display: none; }
 
     .chip {
       flex: 0 0 auto;
       border: 0;
       border-radius: 999px;
-      background: rgba(255,255,255,.66);
-      color: #706861;
-      padding: 9px 12px;
-      font-size: 12px;
+      background: var(--surface);
+      color: var(--muted);
+      padding: 9px 15px;
+      font-size: 12.5px;
       font-weight: 800;
       white-space: nowrap;
+      box-shadow: var(--shadow-soft);
     }
 
-    .chip.active {
-      background: #151311;
-      color: #fff;
-    }
+    .chip.active { background: var(--accent); color: #fff; box-shadow: 0 10px 20px rgba(108,92,231,.3); }
 
-    .list {
+    .list-stack {
       display: grid;
-      gap: 10px;
+      gap: 11px;
+      margin-top: 16px;
     }
+
+    .recipe-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 66px 1fr auto;
+      gap: 13px;
+      align-items: center;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .recipe-row:active { transform: scale(.99); }
+
+    .row-open {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      background: transparent;
+      z-index: 1;
+    }
+
+    .row-thumb {
+      width: 66px;
+      height: 66px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: rgba(27, 28, 48, .5);
+      position: relative;
+      z-index: 1;
+    }
+
+    .row-thumb svg.dish { width: 40px; height: 32px; }
+
+    .row-info { min-width: 0; position: relative; z-index: 1; }
+
+    .row-info h3 {
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1.2;
+      letter-spacing: -.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-info p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-meta {
+      display: flex;
+      gap: 10px;
+      margin-top: 7px;
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .row-meta span { display: inline-flex; align-items: center; gap: 3px; }
+    .row-meta svg { width: 12px; height: 12px; color: var(--accent); }
+
+    .row-side {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+    }
+
+    .row-fav {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--surface-2);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+    }
+
+    .row-fav svg { width: 16px; height: 16px; }
+
+    .row-fav.is-active { color: #fff; background: var(--amber); }
+    .row-fav.is-active svg { fill: #fff; }
+
+    .row-chev { color: var(--muted); display: grid; place-items: center; }
+    .row-chev svg { width: 18px; height: 18px; }
+
+    /* ---------- shopping ---------- */
+    .bubble-row {
+      display: flex;
+      gap: 9px;
+      margin-top: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .bubble-row::-webkit-scrollbar { display: none; }
+
+    .bubble {
+      flex: 0 0 auto;
+      min-width: 70px;
+      border: 0;
+      border-radius: 16px;
+      padding: 11px 12px;
+      display: grid;
+      gap: 3px;
+      justify-items: start;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      color: var(--ink);
+    }
+
+    .bubble b { font-size: 12px; font-weight: 800; }
+    .bubble em { font-style: normal; font-size: 11px; font-weight: 700; color: var(--muted); }
+    .bubble i {
+      width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center;
+      margin-bottom: 4px; font-size: 12px; font-weight: 900; color: #fff;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      margin: 18px -18px 0;
+      padding: 10px 18px 12px;
+      background: linear-gradient(180deg, var(--app-mid) 72%, rgba(247,246,251,0));
+    }
+
+    .toolbar .search-wrap { margin-bottom: 0; }
 
     .category-title {
-      margin: 18px 2px 8px;
-      font-size: 12px;
-      font-weight: 900;
-      color: #34302d;
+      margin: 22px 4px 10px;
+      font-size: 13px;
+      font-weight: 850;
+      color: var(--ink);
     }
 
-    .shopping-item,
-    .timeline-row {
-      border-radius: 20px;
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(255,255,255,.6);
-      box-shadow: 0 10px 24px rgba(67, 48, 38, .07);
-    }
+    .list { display: grid; gap: 10px; }
 
     .shopping-item {
-      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      padding: 13px;
       display: grid;
-      gap: 10px;
+      gap: 11px;
     }
 
     .shopping-main {
@@ -688,391 +787,341 @@
       align-items: start;
     }
 
-    .shopping-main strong {
-      display: block;
-      font-size: 14px;
-      line-height: 1.25;
-    }
-
-    .shopping-main span {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.38;
-    }
+    .shopping-main strong { display: block; font-size: 14.5px; font-weight: 800; line-height: 1.25; }
+    .shopping-main span { display: block; margin-top: 4px; color: var(--muted); font-size: 11.5px; line-height: 1.4; font-weight: 600; }
 
     .qty {
-      color: #927f2d;
-      font-size: 12px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .checks {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-    }
-
-    .check {
-      height: 38px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      border-radius: 14px;
-      background: rgba(246,241,239,.88);
-      padding: 0 9px;
-      color: #5c554f;
+      color: var(--accent);
       font-size: 12px;
       font-weight: 800;
       white-space: nowrap;
+      background: var(--accent-soft);
+      padding: 5px 9px;
+      border-radius: 999px;
     }
 
-    .check input {
-      width: 17px;
-      height: 17px;
-      accent-color: #151311;
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .check {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 13px;
+      background: var(--surface-2);
+      padding: 0 11px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
-    .shopping-item.owned {
-      background: #eef6f2;
-    }
+    .check input { width: 18px; height: 18px; accent-color: var(--accent); }
 
-    .shopping-item.bought {
-      background: #f4ead2;
-      opacity: .72;
-    }
+    .shopping-item.owned { background: var(--mint-soft); }
+    .shopping-item.bought { background: var(--amber-soft); opacity: .85; }
 
-    .inline-actions {
-      justify-content: end;
-    }
+    .inline-actions { display: flex; gap: 7px; justify-content: flex-end; }
 
     .inline-actions button {
       border: 0;
       border-radius: 999px;
-      background: rgba(255,255,255,.7);
-      padding: 7px 10px;
-      color: #34302d;
-      font-size: 11px;
-      font-weight: 900;
-      cursor: pointer;
+      background: var(--surface-2);
+      padding: 8px 13px;
+      color: var(--ink-soft);
+      font-size: 11.5px;
+      font-weight: 800;
     }
 
-    .inline-actions button.danger {
-      color: #8a2e22;
-      background: #f3e0d9;
-    }
+    .inline-actions button.danger { color: #c23a2b; background: #fbe4e0; }
 
-    .timeline {
-      display: grid;
-      gap: 10px;
-      margin-top: 16px;
-    }
+    /* ---------- timeline ---------- */
+    .timeline { display: grid; gap: 0; margin-top: 18px; position: relative; }
 
     .timeline-row {
-      min-height: 74px;
-      padding: 13px;
       display: grid;
-      grid-template-columns: 76px 1fr;
-      gap: 10px;
+      grid-template-columns: 82px 1fr;
+      gap: 16px;
       align-items: start;
+      padding-bottom: 16px;
+      position: relative;
     }
+
+    .timeline-row::before {
+      content: "";
+      position: absolute;
+      left: 91px;
+      top: 20px;
+      bottom: -4px;
+      width: 2px;
+      background: var(--line);
+    }
+
+    .timeline-row:last-child::before { display: none; }
 
     .time {
-      color: #9b785f;
-      font-size: 12px;
-      line-height: 1.2;
-      font-weight: 900;
-    }
-
-    .task strong {
-      display: block;
-      font-size: 14px;
-      line-height: 1.25;
-      margin-bottom: 5px;
-    }
-
-    .task span {
-      color: var(--muted);
+      color: var(--accent);
       font-size: 11.5px;
-      line-height: 1.48;
+      line-height: 1.3;
+      font-weight: 800;
+      text-align: right;
+      padding-top: 12px;
     }
 
+    .task {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-soft);
+      padding: 13px 14px;
+      position: relative;
+    }
+
+    .task::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--app-mid);
+    }
+
+    .task strong { display: block; font-size: 14px; font-weight: 800; line-height: 1.25; margin-bottom: 5px; }
+    .task span { color: var(--muted); font-size: 12px; line-height: 1.5; font-weight: 600; }
+
+    /* ---------- nav ---------- */
     .nav {
       position: absolute;
       left: 50%;
-      bottom: max(12px, env(safe-area-inset-bottom));
+      bottom: max(14px, env(safe-area-inset-bottom));
       transform: translateX(-50%);
-      width: 166px;
-      height: 58px;
+      width: min(320px, calc(100% - 40px));
+      height: 62px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       align-items: center;
-      gap: 2px;
-      border-radius: 24px;
-      background: rgba(255,255,255,.88);
-      box-shadow: 0 14px 34px rgba(65, 46, 35, .18);
+      gap: 4px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .9);
+      box-shadow: var(--shadow-float);
       z-index: 20;
-      padding: 6px;
+      padding: 8px;
       backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, .7);
     }
 
     .nav button {
-      width: 46px;
       height: 46px;
       border: 0;
-      border-radius: 18px;
+      border-radius: 15px;
       background: transparent;
-      color: #181511;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 9.5px;
+      font-weight: 800;
     }
+
+    .nav button svg { width: 21px; height: 21px; }
 
     .nav button.active {
-      background: #151311;
+      background: var(--accent);
       color: #fff;
-      box-shadow: 0 10px 18px rgba(15, 13, 11, .2);
+      box-shadow: 0 12px 22px rgba(108, 92, 231, .4);
     }
 
+    /* ---------- modal ---------- */
     .modal {
       position: absolute;
       inset: 0;
       z-index: 40;
       display: none;
       align-items: end;
-      background: rgba(22, 18, 15, .38);
-      padding-top: 70px;
+      background: rgba(20, 18, 40, .42);
+      backdrop-filter: blur(2px);
+      padding-top: 66px;
     }
 
-    .modal.open {
-      display: flex;
-    }
+    .modal.open { display: flex; }
 
     .sheet {
       width: 100%;
       max-height: 92%;
       display: grid;
       grid-template-rows: auto 1fr;
-      border-radius: 31px 31px 0 0;
+      border-radius: 28px 28px 0 0;
       overflow: hidden;
-      background: #f7f4f4;
-      box-shadow: 0 -22px 44px rgba(34, 25, 19, .26);
+      background: var(--app-mid);
+      box-shadow: 0 -22px 44px rgba(30, 25, 60, .3);
     }
 
-    #recipeModal .sheet {
-      height: calc(100% - 24px);
-      max-height: none;
-    }
+    #recipeModal .sheet { height: calc(100% - 20px); max-height: none; }
 
     .sheet-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 14px;
-      background: #fff;
+      padding: 15px 16px;
+      background: var(--surface);
       border-bottom: 1px solid var(--line);
     }
 
-    .sheet-head strong {
-      min-width: 0;
-      font-size: 15px;
-      line-height: 1.25;
-    }
+    .sheet-head strong { min-width: 0; font-size: 16px; font-weight: 850; }
 
     .sheet-head button {
       flex: 0 0 auto;
       border: 0;
       border-radius: 999px;
-      background: #efe4de;
-      padding: 9px 12px;
-      color: #28231f;
-      font-size: 12px;
-      font-weight: 900;
+      background: var(--surface-2);
+      padding: 9px 14px;
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 800;
     }
 
-    .sheet-body {
-      overflow: auto;
-      padding: 14px;
-    }
+    .sheet-body { overflow: auto; padding: 16px; }
+    #recipeModal .sheet-body { padding: 14px 16px 16px; }
 
-    #recipeModal .sheet-body {
-      padding: 10px 14px 14px;
-    }
-
-    .poster {
-      border-radius: 28px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: var(--soft-shadow);
-    }
+    .poster { border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); box-shadow: var(--shadow-card); }
 
     .poster-top {
-      min-height: 190px;
-      padding: 22px 18px;
+      min-height: 172px;
+      padding: 22px 20px;
       position: relative;
-      overflow: hidden;
+      display: grid;
+      place-items: start;
+      align-content: end;
     }
 
-    #recipeModal .poster-top {
-      min-height: 162px;
-      padding: 18px;
+    .poster-top .label {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .55);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--ink);
     }
 
-    .poster-top h2 {
-      max-width: 286px;
-      font-size: 28px;
-      line-height: 1.12;
-      letter-spacing: -.03em;
-      font-weight: 900;
+    .poster-top h2 { margin-top: 10px; font-size: 26px; line-height: 1.14; letter-spacing: -.03em; font-weight: 900; color: var(--ink); }
+    .poster-top p { margin-top: 8px; max-width: 250px; color: rgba(27,28,48,.66); font-size: 12.5px; line-height: 1.5; font-weight: 600; }
+
+    .poster-art {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 92px;
+      height: 74px;
+      color: rgba(27, 28, 48, .38);
     }
 
-    .poster-top p {
-      max-width: 230px;
-      margin-top: 10px;
-      color: rgba(21,19,17,.62);
-      font-size: 12px;
-      line-height: 1.5;
-      font-weight: 700;
-    }
-
-    .poster-meta {
-      display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-
-    #recipeModal .poster-meta {
-      margin-top: 12px;
-    }
+    .poster-meta { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
 
     .poster-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       border-radius: 999px;
-      background: rgba(255,255,255,.45);
-      padding: 7px 10px;
-      font-size: 11px;
-      font-weight: 850;
+      background: rgba(255, 255, 255, .62);
+      padding: 7px 11px;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--ink);
     }
 
-    .poster-body {
-      display: grid;
-      gap: 12px;
-      padding: 14px;
-    }
+    .poster-meta svg { width: 13px; height: 13px; }
 
-    .poster-block {
-      border-radius: 20px;
-      background: #f7f4f2;
-      padding: 14px;
-    }
+    .poster-body { display: grid; gap: 12px; padding: 16px; }
 
-    .poster-block h3 {
-      margin-bottom: 9px;
-      font-size: 13px;
-      line-height: 1;
-    }
+    .poster-block { border-radius: var(--radius-md); background: var(--surface-2); padding: 15px; }
 
-    .poster-block ul,
-    .poster-block ol {
-      margin: 0;
-      padding-left: 18px;
-    }
+    .poster-block h3 { margin-bottom: 10px; font-size: 13.5px; font-weight: 850; display: flex; align-items: center; gap: 7px; }
+    .poster-block h3 svg { width: 16px; height: 16px; color: var(--accent); }
+    .poster-block ul, .poster-block ol { margin: 0; padding-left: 20px; }
+    .poster-block li { margin: 7px 0; color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
+    .poster-block p { color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
 
-    .poster-block li {
-      margin: 6px 0;
-      color: #453f3a;
-      font-size: 13px;
-      line-height: 1.52;
-    }
-
-    .poster-block p {
-      color: #453f3a;
-      font-size: 13px;
-      line-height: 1.52;
-    }
-
-    .editor-form {
-      display: grid;
-      gap: 12px;
-    }
-
-    .form-row {
-      display: grid;
-      gap: 6px;
-    }
-
-    .form-row label {
-      color: #403a35;
-      font-size: 12px;
-      font-weight: 900;
-    }
+    /* ---------- editor ---------- */
+    .editor-form { display: grid; gap: 13px; }
+    .form-row { display: grid; gap: 7px; }
+    .form-row label { color: var(--ink-soft); font-size: 12.5px; font-weight: 800; }
 
     .form-row input,
     .form-row textarea,
     .form-row select {
       width: 100%;
-      border: 1px solid rgba(30,24,20,.08);
-      border-radius: 16px;
-      background: rgba(255,255,255,.86);
-      color: var(--ink);
-      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 13px;
       outline: 0;
-      font-size: 13px;
-      line-height: 1.35;
+      font-size: 13.5px;
+      line-height: 1.4;
+      font-weight: 500;
     }
 
-    .form-row textarea {
-      min-height: 84px;
-      resize: vertical;
-    }
+    .form-row input:focus,
+    .form-row textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .choice-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 7px;
-    }
+    .form-row textarea { min-height: 86px; resize: vertical; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .choice-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
 
     .choice-grid label {
       display: flex;
       align-items: center;
-      gap: 8px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.7);
-      padding: 10px;
-      color: #403a35;
-      font-size: 12px;
-      font-weight: 800;
+      gap: 9px;
+      border-radius: 13px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 11px;
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      font-weight: 700;
     }
 
     .form-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 9px;
       position: sticky;
       bottom: 0;
-      padding-top: 4px;
-      background: linear-gradient(180deg, rgba(247,244,244,0), #f7f4f4 35%);
+      padding-top: 6px;
+      background: linear-gradient(180deg, rgba(247,246,251,0), var(--app-mid) 40%);
     }
 
+    .text-button {
+      border: 0;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #fff;
+      padding: 13px;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 12px 22px rgba(108, 92, 231, .3);
+    }
+
+    .text-button.soft { background: var(--surface-2); color: var(--ink); box-shadow: none; }
+    .text-button.danger { background: #fbe4e0; color: #c23a2b; box-shadow: none; }
+
     .empty {
-      padding: 38px 8px;
+      padding: 40px 12px;
       color: var(--muted);
       text-align: center;
       font-size: 13px;
+      font-weight: 600;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-soft);
     }
 
     svg {
-      width: 19px;
-      height: 19px;
       stroke: currentColor;
       stroke-width: 2;
       fill: none;
@@ -1081,8 +1130,7 @@
     }
 
     @media (max-width: 480px) {
-      html,
-      body {
+      html, body {
         min-height: 100%;
         overflow-x: hidden;
         overflow-y: auto;
@@ -1090,11 +1138,7 @@
         touch-action: pan-y;
       }
 
-      body {
-        display: block;
-        padding: 0;
-        background: var(--app);
-      }
+      body { display: block; padding: 0; background: var(--app-mid); }
 
       .phone-shell {
         width: 100%;
@@ -1106,39 +1150,16 @@
         overflow: visible;
       }
 
-      .app {
-        min-height: 100dvh;
-        height: auto;
-        display: block;
-      }
+      .app { min-height: 100dvh; height: auto; display: block; }
 
       .screen {
-        padding-top: max(12px, env(safe-area-inset-top));
+        padding-top: max(14px, env(safe-area-inset-top));
         min-height: 100dvh;
         overflow: visible;
       }
 
-      .topbar {
-        margin-bottom: 16px;
-      }
-
-      .quick-note {
-        margin-top: 16px;
-        height: 50px;
-      }
-
-      .section-head {
-        margin: 20px 0 10px;
-      }
-
-      .nav {
-        position: fixed;
-        bottom: max(12px, env(safe-area-inset-bottom));
-      }
-
-      .modal {
-        position: fixed;
-      }
+      .nav { position: fixed; bottom: max(14px, env(safe-area-inset-bottom)); }
+      .modal { position: fixed; }
     }
   </style>
 </head>
@@ -1146,107 +1167,62 @@
   <div class="phone-shell">
     <div class="app">
       <main class="screen">
-        <section id="view-recipes" class="view active" aria-label="레시피">
+        <!-- ===================== HOME ===================== -->
+        <section id="view-home" class="view active" aria-label="홈">
           <div class="topbar">
-            <div class="brand-mark" aria-hidden="true">
+            <div class="brand-pill">
               <img src="./assets/icons/icon-192.png" alt="" />
+              <div>
+                <b>저녁 준비 플래너</b>
+                <span>오늘도 맛있게</span>
+              </div>
             </div>
-            <button class="icon-button" type="button" aria-label="레시피 검색" onclick="openRecipeLibrary(true, true)">
-              <svg viewBox="0 0 24 24"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
-            </button>
+            <div class="top-actions">
+              <button class="icon-button ghost" type="button" aria-label="레시피 검색" onclick="goSearch()">
+                <svg viewBox="0 0 24 24"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+              </button>
+            </div>
           </div>
 
-          <p class="label">Dinner practices</p>
-          <h1><span class="line">오늘 저녁 준비,</span><span class="line"><strong>무엇부터</strong> 볼까요?</span></h1>
+          <p class="eyebrow">Dinner made easy</p>
+          <h1>오늘 저녁 준비,<br><span class="accent">무엇부터</span> 볼까요?</h1>
+          <p class="lead">필요한 재료와 조리 순서를 한 화면에서 확인하세요.</p>
 
-          <div class="quick-note">
-            <span>필요한 재료와 조리 순서를 바로 확인하세요.</span>
-            <button type="button" aria-label="장보기로 이동" data-view-jump="shopping">
-              <svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          <div class="tiles">
+            <button class="tile" type="button" data-view-jump="recipes" aria-label="레시피 목록">
+              <span class="glyph" style="background:var(--accent-soft);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg></span>
+              <b>레시피</b>
+            </button>
+            <button class="tile" type="button" data-view-jump="shopping" aria-label="장보기">
+              <span class="glyph" style="background:var(--mint-soft);color:#159a76"><svg viewBox="0 0 24 24"><path d="M6 7h15l-2 9H8L6 7Z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg></span>
+              <b>장보기</b>
+            </button>
+            <button class="tile" type="button" data-view-jump="timeline" aria-label="조리 순서">
+              <span class="glyph" style="background:var(--amber-soft);color:#e07d1c"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg></span>
+              <b>순서</b>
+            </button>
+            <button class="tile" type="button" onclick="openRecipeEditor()" aria-label="레시피 추가">
+              <span class="glyph" style="background:#ffe6ec;color:#e05575"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>
+              <b>추가</b>
             </button>
           </div>
 
           <div class="section-head">
             <div>
               <h2>추천 레시피</h2>
-              <small id="recipeCount">5개 메뉴</small>
+              <small id="recipeCount">즐겨찾기한 메뉴</small>
             </div>
-            <div class="section-actions">
-              <button id="moreRecipesButton" class="text-button soft compact hidden" type="button" onclick="openRecipeLibrary(false, true)">더보기</button>
-              <button class="text-button soft compact" type="button" onclick="openRecipeEditor()">레시피 추가</button>
-            </div>
+            <button class="view-all" type="button" data-view-jump="recipes">전체보기</button>
           </div>
-
-          <div id="recipeGrid" class="recipe-grid"></div>
-
-          <article class="feature-card">
-            <h3>장보기와 조리 순서를<br>한 화면에서 이어서 체크</h3>
-            <p class="mini-line">보유 재료, 구매 완료, 타임라인이 로컬에 저장됩니다.</p>
-            <div class="utility-actions">
-              <button id="installAppButton" class="install-button" type="button" onclick="handleInstallClick()">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-                홈화면에 설치
-              </button>
-              <button id="wakeLockButton" class="install-button secondary" type="button" onclick="toggleWakeLock()">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="m4.22 4.22 2.12 2.12"/><path d="m17.66 17.66 2.12 2.12"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.22 19.78 2.12-2.12"/><path d="m17.66 6.34 2.12-2.12"/><circle cx="12" cy="12" r="4"/></svg>
-                화면 켜두기
-              </button>
-            </div>
-            <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
-          </article>
-        </section>
-
-        <section id="view-recipe-library" class="view" aria-label="전체 레시피">
-          <div class="topbar">
-            <button class="icon-button" type="button" aria-label="레시피로 돌아가기" data-view-jump="recipes">
-              <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <button class="icon-button" type="button" aria-label="레시피 추가" onclick="openRecipeEditor()">
-              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            </button>
-          </div>
-
-          <p class="label">Recipe library</p>
-          <h1><span class="line">모든 레시피를</span><span class="line"><strong>빠르게</strong> 찾아보세요.</span></h1>
-
-          <div class="recipe-search-panel">
-            <label class="search-wrap">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
-              <input id="recipeSearchBox" type="search" placeholder="레시피 검색: 감바스, 파스타, 소스..." />
-            </label>
-          </div>
+          <div id="recipeCarousel" class="carousel"></div>
 
           <div class="section-head">
             <div>
-              <h2>전체 레시피</h2>
-              <small id="recipeLibraryCount">0개 메뉴</small>
+              <h2>준비 진행률</h2>
+              <small>장보기 체크 현황</small>
             </div>
-            <button class="text-button soft compact" type="button" onclick="openRecipeEditor()">레시피 추가</button>
+            <button class="view-all" type="button" data-view-jump="shopping">장보기</button>
           </div>
-
-          <div id="recipeLibraryGrid" class="recipe-grid recipe-library-grid"></div>
-        </section>
-
-        <section id="view-shopping" class="view" aria-label="장보기">
-          <div class="topbar">
-            <button class="icon-button" type="button" aria-label="레시피로 돌아가기" data-view-jump="recipes">
-              <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-          </div>
-
-          <p class="label">Shopping check</p>
-          <h1><span class="line">필요한 재료를</span><span class="line"><strong>가볍게</strong> 체크하세요.</span></h1>
-
-          <div class="section-head">
-            <div>
-              <h2>분류별 요약</h2>
-              <small id="shoppingSummary">-</small>
-            </div>
-            <button class="text-button soft" type="button" onclick="openShoppingEditor()">재료 추가</button>
-          </div>
-
-          <div class="bubble-row" id="categoryBubbles"></div>
-
           <div class="progress-panel">
             <h3>준비 진행률</h3>
             <div class="progress-body">
@@ -1254,9 +1230,81 @@
                 <div class="percent"><span id="progressNumber">0</span><span>%</span></div>
                 <p class="progress-copy" id="progressCopy">체크한 재료가 아직 없습니다.</p>
               </div>
-              <div class="dot-meter" id="dotMeter"></div>
+              <div class="ring" id="progressRing"><b id="progressRingText">0%</b></div>
+            </div>
+            <button class="go-shop" type="button" data-view-jump="shopping">
+              <svg viewBox="0 0 24 24"><path d="M6 7h15l-2 9H8L6 7Z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+              장보기 이어서 체크
+            </button>
+          </div>
+
+          <article class="utility-card">
+            <h3>홈 화면에 설치하고 더 편하게</h3>
+            <p class="mini-line">보유 재료, 구매 완료, 타임라인이 이 기기에 저장됩니다.</p>
+            <div class="utility-actions">
+              <button id="installAppButton" class="pill-button" type="button" onclick="handleInstallClick()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                홈화면에 설치
+              </button>
+              <button id="wakeLockButton" class="pill-button secondary" type="button" onclick="toggleWakeLock()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3"/><path d="M12 19v3"/><path d="m4.22 4.22 2.12 2.12"/><path d="m17.66 17.66 2.12 2.12"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.22 19.78 2.12-2.12"/><path d="m17.66 6.34 2.12-2.12"/><circle cx="12" cy="12" r="4"/></svg>
+                화면 켜두기
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===================== RECIPE LIST ===================== -->
+        <section id="view-recipes" class="view" aria-label="레시피 목록">
+          <div class="topbar">
+            <div class="brand-pill">
+              <img src="./assets/icons/icon-192.png" alt="" />
+              <div>
+                <b>레시피 목록</b>
+                <span id="recipeLibraryCount">0개 메뉴</span>
+              </div>
+            </div>
+            <div class="top-actions">
+              <button class="icon-button" type="button" aria-label="레시피 추가" onclick="openRecipeEditor()">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              </button>
             </div>
           </div>
+
+          <p class="eyebrow">Recipe library</p>
+          <h1>모든 레시피를<br><span class="accent">빠르게</span> 찾아보세요.</h1>
+
+          <label class="search-wrap" style="margin-top:18px">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+            <input id="recipeSearchBox" type="search" placeholder="레시피 검색: 감바스, 파스타, 소스..." />
+          </label>
+
+          <div class="chips" id="recipeListFilters"></div>
+
+          <div id="recipeListStack" class="list-stack"></div>
+        </section>
+
+        <!-- ===================== SHOPPING ===================== -->
+        <section id="view-shopping" class="view" aria-label="장보기">
+          <div class="topbar">
+            <div class="brand-pill">
+              <img src="./assets/icons/icon-192.png" alt="" />
+              <div>
+                <b>장보기 체크</b>
+                <span id="shoppingSummary">-</span>
+              </div>
+            </div>
+            <div class="top-actions">
+              <button class="icon-button" type="button" aria-label="재료 추가" onclick="openShoppingEditor()">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <p class="eyebrow">Shopping check</p>
+          <h1>필요한 재료를<br><span class="accent">가볍게</span> 체크하세요.</h1>
+
+          <div class="bubble-row" id="categoryBubbles"></div>
 
           <div class="toolbar">
             <label class="search-wrap">
@@ -1270,36 +1318,42 @@
           <div id="shoppingList"></div>
         </section>
 
+        <!-- ===================== TIMELINE ===================== -->
         <section id="view-timeline" class="view" aria-label="조리 순서">
           <div class="topbar">
-            <div class="brand-mark" aria-hidden="true">
+            <div class="brand-pill">
               <img src="./assets/icons/icon-192.png" alt="" />
+              <div>
+                <b>조리 타임라인</b>
+                <span>순서대로 준비</span>
+              </div>
             </div>
           </div>
 
-          <p class="label">Cooking timeline</p>
-          <h1><span class="line">긴 조리는 먼저,</span><span class="line"><strong>빠른 요리는</strong> 마지막에.</span></h1>
-
-          <div class="quick-note">
-            <span>삼겹살은 가장 먼저 시작하고 감바스는 마지막 10분에 조리합니다.</span>
-            <button type="button" aria-label="맨 아래로 이동" onclick="document.getElementById('timeline').lastElementChild?.scrollIntoView({behavior:'smooth', block:'nearest'})">
-              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-            </button>
-          </div>
+          <p class="eyebrow">Cooking timeline</p>
+          <h1>긴 조리는 먼저,<br><span class="accent">빠른 요리는</span> 마지막에.</h1>
+          <p class="lead">삼겹살은 가장 먼저 시작하고 감바스는 마지막 10분에 조리합니다.</p>
 
           <div id="timeline" class="timeline"></div>
         </section>
       </main>
 
       <nav class="nav" aria-label="하단 메뉴">
-        <button class="active" type="button" data-view="recipes" aria-label="레시피">
+        <button class="active" type="button" data-view="home" aria-label="홈">
+          <svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+          홈
+        </button>
+        <button type="button" data-view="recipes" aria-label="레시피">
           <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg>
+          레시피
         </button>
         <button type="button" data-view="shopping" aria-label="장보기">
           <svg viewBox="0 0 24 24"><path d="M6 7h15l-2 9H8L6 7Z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          장보기
         </button>
         <button type="button" data-view="timeline" aria-label="조리 순서">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>
+          순서
         </button>
       </nav>
 
@@ -1331,7 +1385,7 @@
         id: 'pork',
         title: '텍사스 바비큐 삼겹살',
         short: '오븐 저온 조리',
-        tint: '#b8c1f4',
+        tint: '#dcd6fb',
         time: '6~7시간',
         serving: '4인분',
         level: '중간',
@@ -1344,7 +1398,7 @@
         id: 'bouillabaisse',
         title: '프렌치 부야베스',
         short: '해산물 스튜',
-        tint: '#ead875',
+        tint: '#fbe7c6',
         time: '70분',
         serving: '4인분',
         level: '중간',
@@ -1357,7 +1411,7 @@
         id: 'gambas',
         title: '감바스 알 아히요',
         short: '마지막 10분',
-        tint: '#cfe6df',
+        tint: '#d6f0e7',
         time: '15분',
         serving: '4인분',
         level: '쉬움',
@@ -1370,7 +1424,7 @@
         id: 'pasta',
         title: '김풍식 냉파스타',
         short: '차갑게 무침',
-        tint: '#ecdcd3',
+        tint: '#fcdfd4',
         time: '25분',
         serving: '4인분',
         level: '쉬움',
@@ -1383,7 +1437,7 @@
         id: 'romesco',
         title: '로메스코 소스',
         short: '곁들임 소스',
-        tint: '#df846e',
+        tint: '#ffdcd2',
         time: '25분',
         serving: '4인분',
         level: '쉬움',
@@ -1450,6 +1504,7 @@
     let activeFilter = 'need';
     let recipeFilter = 'all';
     let recipeSearchQuery = '';
+    let recipeListFilter = 'all';
     let recipes = [];
     let shoppingItems = [];
     let db;
@@ -1460,7 +1515,7 @@
     const dbName = 'dinnerPlannerContentDB';
     const dbVersion = 1;
     const maxFavoriteRecipes = 6;
-    const recipeTints = ['#b8c1f4', '#ead875', '#cfe6df', '#ecdcd3', '#df846e', '#879567'];
+    const recipeTints = ['#dcd6fb', '#fbe7c6', '#d6f0e7', '#fcdfd4', '#ffdcd2', '#dbe6ff'];
 
     function openDatabase() {
       return new Promise((resolve, reject) => {
@@ -1524,8 +1579,8 @@
 
     async function refreshContent() {
       await loadContent();
-      renderRecipes();
-      renderRecipeLibrary();
+      renderRecipeCarousel();
+      renderRecipeList();
       renderShopping();
       updateStats();
     }
@@ -1559,13 +1614,24 @@
       return value.split('\n').map(item => item.trim()).filter(Boolean);
     }
 
-    const icons = {
-      steam: '<svg class="card-art" viewBox="0 0 80 64"><path d="M13 52c12-15 28-15 40 0"/><path d="M24 16c-9 10 8 11-1 22"/><path d="M42 11c-11 12 10 13-1 27"/><path d="M59 18c-8 8 7 10-1 20"/></svg>',
-      pot: '<svg class="card-art" viewBox="0 0 80 64"><path d="M17 29h46l-5 22H22z"/><path d="M25 25h30"/><path d="M30 20h20"/><path d="M13 34h7"/><path d="M60 34h7"/></svg>',
-      shrimp: '<svg class="card-art" viewBox="0 0 80 64"><path d="M23 39c9 11 31 8 35-7 2-9-6-17-17-16"/><path d="M42 16c-18 1-23 16-13 24"/><path d="M25 40l-8 8"/><path d="M56 23l9-8"/><path d="M51 30h.1"/></svg>',
-      noodle: '<svg class="card-art" viewBox="0 0 80 64"><path d="M17 30h46l-6 22H23z"/><path d="M24 21c0 9 5 9 5 18"/><path d="M38 16c0 12 5 12 5 25"/><path d="M53 20c0 10 4 10 4 20"/></svg>',
-      sauce: '<svg class="card-art" viewBox="0 0 80 64"><path d="M31 15h18"/><path d="M34 15l-4 36h24l-4-36"/><path d="M31 32h22"/><path d="M37 40h10"/></svg>'
+    const dishIcons = {
+      steam: '<svg class="dish" viewBox="0 0 80 64"><path d="M13 52c12-15 28-15 40 0"/><path d="M24 16c-9 10 8 11-1 22"/><path d="M42 11c-11 12 10 13-1 27"/><path d="M59 18c-8 8 7 10-1 20"/></svg>',
+      pot: '<svg class="dish" viewBox="0 0 80 64"><path d="M17 29h46l-5 22H22z"/><path d="M25 25h30"/><path d="M30 20h20"/><path d="M13 34h7"/><path d="M60 34h7"/></svg>',
+      shrimp: '<svg class="dish" viewBox="0 0 80 64"><path d="M23 39c9 11 31 8 35-7 2-9-6-17-17-16"/><path d="M42 16c-18 1-23 16-13 24"/><path d="M25 40l-8 8"/><path d="M56 23l9-8"/><path d="M51 30h.1"/></svg>',
+      noodle: '<svg class="dish" viewBox="0 0 80 64"><path d="M17 30h46l-6 22H23z"/><path d="M24 21c0 9 5 9 5 18"/><path d="M38 16c0 12 5 12 5 25"/><path d="M53 20c0 10 4 10 4 20"/></svg>',
+      sauce: '<svg class="dish" viewBox="0 0 80 64"><path d="M31 15h18"/><path d="M34 15l-4 36h24l-4-36"/><path d="M31 32h22"/><path d="M37 40h10"/></svg>'
     };
+    const dishArtOrder = ['steam', 'pot', 'shrimp', 'noodle', 'sauce'];
+
+    function dishArtFor(recipe, index) {
+      const map = { pork: 'steam', bouillabaisse: 'pot', gambas: 'shrimp', pasta: 'noodle', romesco: 'sauce' };
+      return dishIcons[map[recipe.id] || dishArtOrder[index % dishArtOrder.length]];
+    }
+
+    const starIcon = '<svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2 6.4 20.2 7.5 14 3 9.6l6.2-.9L12 3Z"/></svg>';
+    const clockIcon = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    const servingIcon = '<svg viewBox="0 0 24 24"><path d="M4 18h16"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M12 5v2"/></svg>';
+    const levelIcon = '<svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20V8"/></svg>';
 
     function saveState() {
       localStorage.setItem(stateKey, JSON.stringify(state));
@@ -1587,14 +1653,20 @@
 
     function setView(name) {
       document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === `view-${name}`));
-      document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === (name === 'recipe-library' ? 'recipes' : name)));
+      document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
       if (name === 'shopping') renderShopping();
-      if (name === 'recipe-library') renderRecipeLibrary();
+      if (name === 'recipes') renderRecipeList();
+      if (name === 'home') { renderRecipeCarousel(); updateStats(); }
       if (window.matchMedia('(max-width: 480px)').matches) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         document.querySelector('.screen').scrollTo?.({ top: 0, behavior: 'smooth' });
       }
+    }
+
+    function goSearch() {
+      setView('recipes');
+      setTimeout(() => document.getElementById('recipeSearchBox')?.focus(), 80);
     }
 
     function isRecipeFavorite(recipe) {
@@ -1605,81 +1677,107 @@
       return recipes.filter(isRecipeFavorite);
     }
 
-    function renderRecipeCards(list) {
-      const art = ['steam', 'pot', 'shrimp', 'noodle', 'sauce'];
-      return list.map((recipe, index) => `
-        <article class="recipe-card" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">
-          <button class="recipe-open" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기"></button>
-          <div class="recipe-card-copy">
-            <h3>${escapeHtml(recipe.title)}</h3>
-            <p>${escapeHtml(recipe.short)}</p>
-          </div>
-          ${icons[art[index % art.length]]}
-          <div class="card-actions">
-            <button class="card-action favorite ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 즐겨찾기 ${isRecipeFavorite(recipe) ? '해제' : '추가'}">
-              <svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2 6.4 20.2 7.5 14 3 9.6l6.2-.9L12 3Z"/></svg>
-            </button>
-            <button class="card-action" type="button" onclick="openRecipeEditor(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 수정">
-              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
-            </button>
-            <button class="card-action danger" type="button" onclick="deleteRecipeItem(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 삭제">
-              <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg>
-            </button>
-            <button class="card-action" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 바로가기">
-              <svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-            </button>
-          </div>
-        </article>
+    function metaChips(recipe, kind = 'meta-chip') {
+      const wrap = kind === 'meta-chip' ? 'meta-chip' : 'row-meta-item';
+      return [
+        recipe.time ? `<span class="${wrap}">${clockIcon}${escapeHtml(recipe.time)}</span>` : '',
+        recipe.serving ? `<span class="${wrap}">${servingIcon}${escapeHtml(recipe.serving)}</span>` : '',
+        recipe.level ? `<span class="${wrap}">${levelIcon}${escapeHtml(recipe.level)}</span>` : ''
+      ].join('');
+    }
+
+    /* ---------- home carousel ---------- */
+    function renderRecipeCarousel() {
+      const el = document.getElementById('recipeCarousel');
+      if (!el) return;
+      const favorites = visibleFavoriteRecipes();
+      const visible = favorites.slice(0, maxFavoriteRecipes);
+      el.innerHTML = visible.length
+        ? visible.map((recipe, index) => `
+          <button class="hero-card" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기">
+            <div class="hero-art" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">
+              ${dishArtFor(recipe, index)}
+              <span class="hero-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" role="button" tabindex="0"
+                onclick="event.stopPropagation(); toggleRecipeFavorite(${jsAttr(recipe.id)})"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleRecipeFavorite(${jsAttr(recipe.id)});}"
+                aria-label="즐겨찾기 토글">${starIcon}</span>
+            </div>
+            <div class="hero-body">
+              <h3>${escapeHtml(recipe.title)}</h3>
+              <p>${escapeHtml(recipe.short || recipe.desc || '')}</p>
+              <div class="meta-row">${metaChips(recipe)}</div>
+            </div>
+          </button>
+        `).join('')
+        : '<div class="empty" style="flex:0 0 100%">즐겨찾기한 레시피가 없습니다. 레시피 목록에서 별표를 눌러 여기에 표시하세요.</div>';
+      document.getElementById('recipeCount').textContent = `즐겨찾기 ${visible.length}개 · 전체 ${recipes.length}개`;
+    }
+
+    /* ---------- recipe list ---------- */
+    function renderRecipeListFilters() {
+      const el = document.getElementById('recipeListFilters');
+      if (!el) return;
+      const favCount = visibleFavoriteRecipes().length;
+      const filters = [
+        ['all', `전체 ${recipes.length}`],
+        ['fav', `즐겨찾기 ${favCount}`],
+        ['quick', '간단 요리'],
+        ['slow', '정성 요리']
+      ];
+      el.innerHTML = filters.map(([id, label]) => `
+        <button class="chip ${recipeListFilter === id ? 'active' : ''}" type="button" onclick="recipeListFilter=${jsAttr(id)}; renderRecipeList();">${escapeHtml(label)}</button>
       `).join('');
     }
 
-    function renderRecipes() {
-      const favorites = visibleFavoriteRecipes();
-      const visible = favorites.slice(0, maxFavoriteRecipes);
-      const grid = document.getElementById('recipeGrid');
-      grid.innerHTML = visible.length
-        ? renderRecipeCards(visible)
-        : '<div class="empty">즐겨찾기한 레시피가 없습니다. 더보기에서 별표를 눌러 메인에 표시할 레시피를 고르세요.</div>';
-      document.getElementById('recipeCount').textContent = `${visible.length}/${favorites.length}개 즐겨찾기`;
-      document.getElementById('moreRecipesButton')?.classList.toggle('hidden', recipes.length <= maxFavoriteRecipes && favorites.length <= maxFavoriteRecipes);
+    function isQuickRecipe(recipe) {
+      return (recipe.level || '').includes('쉬움');
     }
 
-    function filteredRecipesForLibrary() {
+    function filteredRecipesForList() {
       const query = recipeSearchQuery.trim().toLowerCase();
-      if (!query) return recipes;
       return recipes.filter(recipe => {
+        if (recipeListFilter === 'fav' && !isRecipeFavorite(recipe)) return false;
+        if (recipeListFilter === 'quick' && !isQuickRecipe(recipe)) return false;
+        if (recipeListFilter === 'slow' && isQuickRecipe(recipe)) return false;
+        if (!query) return true;
         const text = [
-          recipe.title,
-          recipe.short,
-          recipe.desc,
-          recipe.time,
-          recipe.serving,
-          recipe.level,
-          ...(recipe.ingredients || []),
-          ...(recipe.steps || [])
+          recipe.title, recipe.short, recipe.desc, recipe.time, recipe.serving, recipe.level,
+          ...(recipe.ingredients || []), ...(recipe.steps || [])
         ].join(' ').toLowerCase();
         return text.includes(query);
       });
     }
 
-    function renderRecipeLibrary() {
-      const grid = document.getElementById('recipeLibraryGrid');
-      if (!grid) return;
+    function renderRecipeList() {
+      const stack = document.getElementById('recipeListStack');
+      if (!stack) return;
       const input = document.getElementById('recipeSearchBox');
       if (input && input.value !== recipeSearchQuery) input.value = recipeSearchQuery;
-      const list = filteredRecipesForLibrary();
-      grid.innerHTML = list.length
-        ? renderRecipeCards(list)
+      renderRecipeListFilters();
+      const list = filteredRecipesForList();
+      stack.innerHTML = list.length
+        ? list.map((recipe, index) => `
+          <article class="recipe-row">
+            <button class="row-open" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기"></button>
+            <div class="row-thumb" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">${dishArtFor(recipe, index)}</div>
+            <div class="row-info">
+              <h3>${escapeHtml(recipe.title)}</h3>
+              <p>${escapeHtml(recipe.short || recipe.desc || '')}</p>
+              <div class="row-meta">
+                ${recipe.time ? `<span>${clockIcon}${escapeHtml(recipe.time)}</span>` : ''}
+                ${recipe.serving ? `<span>${servingIcon}${escapeHtml(recipe.serving)}</span>` : ''}
+                ${recipe.level ? `<span>${levelIcon}${escapeHtml(recipe.level)}</span>` : ''}
+              </div>
+            </div>
+            <div class="row-side">
+              <button class="row-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 즐겨찾기 ${isRecipeFavorite(recipe) ? '해제' : '추가'}">${starIcon}</button>
+              <span class="row-chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+            </div>
+          </article>
+        `).join('')
         : '<div class="empty">검색 결과가 없습니다.</div>';
-      document.getElementById('recipeLibraryCount').textContent = `${list.length}/${recipes.length}개 메뉴`;
-    }
-
-    function openRecipeLibrary(focusSearch = false, resetSearch = false) {
-      if (resetSearch) recipeSearchQuery = '';
-      setView('recipe-library');
-      if (focusSearch) {
-        setTimeout(() => document.getElementById('recipeSearchBox')?.focus(), 80);
-      }
+      const countEl = document.getElementById('recipeLibraryCount');
+      if (countEl) countEl.textContent = `${list.length}/${recipes.length}개 메뉴`;
     }
 
     async function toggleRecipeFavorite(id) {
@@ -1692,30 +1790,32 @@
     function openRecipe(id) {
       const recipe = recipes.find(item => item.id === id);
       if (!recipe) return;
+      const index = recipes.indexOf(recipe);
       document.getElementById('modalTitle').textContent = recipe.title;
       document.getElementById('modalBody').innerHTML = `
         <article class="poster">
-          <div class="poster-top" style="background:${escapeHtml(recipe.tint || '#ecdcd3')}">
-            <p class="label">${escapeHtml(recipe.short)}</p>
+          <div class="poster-top" style="background:${escapeHtml(recipe.tint || '#ece9fd')}">
+            <span class="poster-art">${dishArtFor(recipe, index < 0 ? 0 : index)}</span>
+            <span class="label">${escapeHtml(recipe.short || '레시피')}</span>
             <h2>${escapeHtml(recipe.title)}</h2>
             <p>${escapeHtml(recipe.desc)}</p>
             <div class="poster-meta">
-              <span>${escapeHtml(recipe.serving)}</span>
-              <span>${escapeHtml(recipe.time)}</span>
-              <span>난이도 ${escapeHtml(recipe.level)}</span>
+              <span>${servingIcon}${escapeHtml(recipe.serving)}</span>
+              <span>${clockIcon}${escapeHtml(recipe.time)}</span>
+              <span>${levelIcon}난이도 ${escapeHtml(recipe.level)}</span>
             </div>
           </div>
           <div class="poster-body">
             <section class="poster-block">
-              <h3>재료</h3>
+              <h3>${servingIcon}재료</h3>
               <ul>${(recipe.ingredients || []).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
             </section>
             <section class="poster-block">
-              <h3>조리 방법</h3>
+              <h3>${clockIcon}조리 방법</h3>
               <ol>${(recipe.steps || []).map(step => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
             </section>
             <section class="poster-block">
-              <h3>핵심 포인트</h3>
+              <h3>${starIcon}핵심 포인트</h3>
               <p>${escapeHtml(recipe.key)}</p>
             </section>
             <div class="form-actions">
@@ -1917,7 +2017,7 @@
             </div>
           </div>
           <div class="form-row">
-            <label class="check"><input type="checkbox" name="favorite" ${isRecipeFavorite(recipe) ? 'checked' : ''}>메인 화면 즐겨찾기에 표시</label>
+            <label class="check"><input type="checkbox" name="favorite" ${isRecipeFavorite(recipe) ? 'checked' : ''}>홈 화면 추천에 표시</label>
           </div>
           <div class="form-row">
             <label for="recipeDesc">상세 설명</label>
@@ -1995,7 +2095,7 @@
           <input type="checkbox" name="dishes" value="${escapeHtml(recipe.id)}" ${(item.dishes || []).includes(recipe.id) ? 'checked' : ''} />
           ${escapeHtml(recipe.title)}
         </label>
-      `).join('') || '<p class="muted-note">먼저 레시피를 추가하면 연결할 수 있습니다.</p>';
+      `).join('') || '<p class="mini-line">먼저 레시피를 추가하면 연결할 수 있습니다.</p>';
       openEditor(item.id ? '재료 수정' : '재료 추가', `
         <form class="editor-form" id="shoppingEditorForm">
           <div class="form-row">
@@ -2083,14 +2183,16 @@
     }
 
     function renderCategoryBubbles() {
-      const colors = ['#ead875', '#879567', '#b8c1f4', '#df846e', '#cfe6df', '#ecdcd3'];
+      const palette = ['#6c5ce7', '#2fc39b', '#ff9f43', '#ff7a90', '#3d7bf0', '#a06bd8'];
       const counts = shoppingItems.reduce((map, item) => {
         map[item.cat] = (map[item.cat] || 0) + 1;
         return map;
       }, {});
       document.getElementById('categoryBubbles').innerHTML = Object.entries(counts).map(([cat, count], index) => `
-        <button class="bubble" type="button" style="background:${colors[index % colors.length]}" onclick="document.getElementById('searchBox').value=${jsAttr(cat)}; renderShopping();">
-          ${escapeHtml(cat)}<br>${count}
+        <button class="bubble" type="button" onclick="document.getElementById('searchBox').value=${jsAttr(cat)}; renderShopping();">
+          <i style="background:${palette[index % palette.length]}">${escapeHtml(cat.slice(0, 1))}</i>
+          <b>${escapeHtml(cat)}</b>
+          <em>${count}개</em>
         </button>
       `).join('');
     }
@@ -2145,20 +2247,24 @@
     }
 
     function updateStats() {
-      const total = shoppingItems.length;
+      const total = shoppingItems.length || 1;
       const owned = shoppingItems.filter(item => getItemState(item.id).owned).length;
       const bought = shoppingItems.filter(item => getItemState(item.id).bought).length;
       const done = owned + bought;
-      const need = total - done;
+      const need = shoppingItems.length - done;
       const pct = Math.round(done / total * 100);
 
-      document.getElementById('shoppingSummary').textContent = `필요 ${need} · 보유 ${owned} · 완료 ${bought}`;
-      document.getElementById('progressNumber').textContent = pct;
-      document.getElementById('progressCopy').textContent = done ? `${done}개 재료가 처리됐고 ${need}개가 남았습니다.` : '체크한 재료가 아직 없습니다.';
+      const summaryEl = document.getElementById('shoppingSummary');
+      if (summaryEl) summaryEl.textContent = `필요 ${need} · 보유 ${owned} · 완료 ${bought}`;
+      const numberEl = document.getElementById('progressNumber');
+      if (numberEl) numberEl.textContent = pct;
+      const copyEl = document.getElementById('progressCopy');
+      if (copyEl) copyEl.textContent = done ? `${done}개 재료가 처리됐고 ${need}개가 남았습니다.` : '체크한 재료가 아직 없습니다.';
 
-      const dots = 20;
-      const filled = Math.round(pct / 100 * dots);
-      document.getElementById('dotMeter').innerHTML = Array.from({ length: dots }, (_, index) => `<span class="${index < filled ? 'done' : ''}"></span>`).join('');
+      const ring = document.getElementById('progressRing');
+      if (ring) ring.style.setProperty('--ring', `${pct}%`);
+      const ringText = document.getElementById('progressRingText');
+      if (ringText) ringText.textContent = `${pct}%`;
     }
 
     function renderTimeline() {
@@ -2189,7 +2295,7 @@
     document.getElementById('searchBox').addEventListener('input', renderShopping);
     document.getElementById('recipeSearchBox').addEventListener('input', event => {
       recipeSearchQuery = event.target.value;
-      renderRecipeLibrary();
+      renderRecipeList();
     });
 
     window.addEventListener('beforeinstallprompt', event => {
@@ -2213,7 +2319,8 @@
       db = await openDatabase();
       await seedDatabaseIfNeeded();
       await loadContent();
-      renderRecipes();
+      renderRecipeCarousel();
+      renderRecipeList();
       renderShopping();
       renderTimeline();
       updateStats();
@@ -2223,7 +2330,7 @@
 
     initApp().catch(error => {
       console.error(error);
-      document.getElementById('recipeGrid').innerHTML = '<div class="empty">데이터베이스를 열 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.</div>';
+      document.getElementById('recipeCarousel').innerHTML = '<div class="empty" style="flex:0 0 100%">데이터베이스를 열 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.</div>';
     });
 
     if ('serviceWorker' in navigator) {
