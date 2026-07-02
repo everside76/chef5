@@ -638,17 +638,10 @@
       border-radius: var(--radius-md);
       padding: 12px;
       box-shadow: var(--shadow-soft);
+      cursor: pointer;
     }
 
     .recipe-row:active { transform: scale(.99); }
-
-    .row-open {
-      position: absolute;
-      inset: 0;
-      border: 0;
-      background: transparent;
-      z-index: 1;
-    }
 
     .row-thumb {
       width: 66px;
@@ -1922,8 +1915,7 @@
       const list = filteredRecipesForList();
       stack.innerHTML = list.length
         ? list.map((recipe, index) => `
-          <article class="recipe-row">
-            <button class="row-open" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기"></button>
+          <article class="recipe-row" role="button" tabindex="0" onclick="openRecipe(${jsAttr(recipe.id)})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRecipe(${jsAttr(recipe.id)});}" aria-label="${escapeHtml(recipe.title)} 열기">
             <div class="row-thumb" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">${dishArtFor(recipe, index)}</div>
             <div class="row-info">
               <h3>${escapeHtml(recipe.title)}</h3>
@@ -1935,7 +1927,7 @@
               </div>
             </div>
             <div class="row-side">
-              <button class="row-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 오늘의 레시피 ${isRecipeFavorite(recipe) ? '해제' : '체크'}">${starIcon}</button>
+              <button class="row-fav ${isRecipeFavorite(recipe) ? 'is-active' : ''}" type="button" onclick="event.stopPropagation(); toggleRecipeFavorite(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 오늘의 레시피 ${isRecipeFavorite(recipe) ? '해제' : '체크'}">${starIcon}</button>
               <span class="row-chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
             </div>
           </article>
