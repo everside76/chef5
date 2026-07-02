@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chef5-dinner-planner-v6';
+const CACHE_NAME = 'chef5-dinner-planner-v7';
 const APP_SHELL = [
   './',
   './index.html',
@@ -29,6 +29,19 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
+  if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then(cached => cached || caches.match('./recipe_mobile_web.html')))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => {
