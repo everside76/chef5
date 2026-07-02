@@ -983,6 +983,15 @@
     }
 
     @media (max-width: 480px) {
+      html,
+      body {
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+      }
+
       body {
         display: block;
         padding: 0;
@@ -991,14 +1000,33 @@
 
       .phone-shell {
         width: 100%;
-        height: 100vh;
+        min-height: 100dvh;
+        height: auto;
         border: 0;
         border-radius: 0;
         box-shadow: none;
+        overflow: visible;
+      }
+
+      .app {
+        min-height: 100dvh;
+        height: auto;
+        display: block;
       }
 
       .screen {
         padding-top: max(22px, env(safe-area-inset-top));
+        min-height: 100dvh;
+        overflow: visible;
+      }
+
+      .nav {
+        position: fixed;
+        bottom: max(12px, env(safe-area-inset-bottom));
+      }
+
+      .modal {
+        position: fixed;
       }
     }
   </style>
@@ -1405,7 +1433,11 @@
       document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === `view-${name}`));
       document.querySelectorAll('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
       if (name === 'shopping') renderShopping();
-      document.querySelector('.screen').scrollTo?.({ top: 0, behavior: 'smooth' });
+      if (window.matchMedia('(max-width: 480px)').matches) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        document.querySelector('.screen').scrollTo?.({ top: 0, behavior: 'smooth' });
+      }
     }
 
     function renderRecipes() {
