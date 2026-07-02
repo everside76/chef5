@@ -399,6 +399,33 @@
       line-height: 1.38;
     }
 
+    .install-button {
+      margin-top: 12px;
+      width: fit-content;
+      border: 0;
+      border-radius: 999px;
+      background: #151311;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 13px;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 12px 24px rgba(15, 13, 11, .16);
+      cursor: pointer;
+    }
+
+    .install-button svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .install-button.is-installed {
+      background: #879567;
+      cursor: default;
+    }
+
     .bubble-row {
       display: flex;
       gap: 8px;
@@ -1011,6 +1038,10 @@
           <article class="feature-card">
             <h3>장보기와 조리 순서를<br>한 화면에서 이어서 체크</h3>
             <p class="mini-line">보유 재료, 구매 완료, 타임라인이 로컬에 저장됩니다.</p>
+            <button id="installAppButton" class="install-button" type="button" onclick="handleInstallClick()">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              홈화면에 설치
+            </button>
             <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
           </article>
         </section>
@@ -1244,6 +1275,7 @@
     let recipes = [];
     let shoppingItems = [];
     let db;
+    let deferredInstallPrompt = null;
 
     const dbName = 'dinnerPlannerContentDB';
     const dbVersion = 1;
@@ -1449,6 +1481,63 @@
       document.getElementById('editorTitle').textContent = title;
       document.getElementById('editorBody').innerHTML = body;
       document.getElementById('editorModal').classList.add('open');
+    }
+
+    function isStandaloneDisplay() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function updateInstallButton(installed = isStandaloneDisplay()) {
+      const button = document.getElementById('installAppButton');
+      if (!button) return;
+      if (installed) {
+        button.classList.add('is-installed');
+        button.disabled = true;
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>설치됨';
+      } else {
+        button.classList.remove('is-installed');
+        button.disabled = false;
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>홈화면에 설치';
+      }
+    }
+
+    async function handleInstallClick() {
+      if (isStandaloneDisplay()) {
+        updateInstallButton(true);
+        return;
+      }
+
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice.catch(() => null);
+        deferredInstallPrompt = null;
+        if (choice?.outcome === 'accepted') updateInstallButton(true);
+        return;
+      }
+
+      openInstallGuide();
+    }
+
+    function openInstallGuide() {
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isAndroid = /android/i.test(navigator.userAgent);
+      const guide = isIOS
+        ? ['Safari 하단 공유 버튼을 누릅니다.', '"홈 화면에 추가"를 선택합니다.', '이름을 확인하고 "추가"를 누릅니다.']
+        : isAndroid
+          ? ['브라우저 메뉴를 엽니다.', '"앱 설치" 또는 "홈 화면에 추가"를 선택합니다.', '설치를 확인합니다.']
+          : ['브라우저 주소창 오른쪽의 설치 아이콘을 확인합니다.', '설치 아이콘이 없다면 메뉴에서 "앱 설치"를 찾습니다.', '지원하지 않는 브라우저에서는 북마크로 저장해 주세요.'];
+
+      openEditor('홈화면 설치 안내', `
+        <div class="poster-block">
+          <h3>설치 버튼이 바로 뜨지 않을 때</h3>
+          <p>브라우저나 기기 정책에 따라 설치 팝업이 자동으로 제공되지 않을 수 있습니다.</p>
+        </div>
+        <div class="poster-block">
+          <h3>설치 방법</h3>
+          <ol>${guide.map(step => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
+        </div>
+        <button class="text-button" type="button" onclick="closeEditor()">확인</button>
+      `);
     }
 
     function openRecipeEditor(id = '') {
@@ -1764,6 +1853,17 @@
 
     document.getElementById('searchBox').addEventListener('input', renderShopping);
 
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      updateInstallButton(false);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      updateInstallButton(true);
+    });
+
     async function initApp() {
       db = await openDatabase();
       await seedDatabaseIfNeeded();
@@ -1772,6 +1872,7 @@
       renderShopping();
       renderTimeline();
       updateStats();
+      updateInstallButton();
     }
 
     initApp().catch(error => {
