@@ -209,6 +209,10 @@
       white-space: nowrap;
     }
 
+    .section-head > div {
+      min-width: 0;
+    }
+
     .section-head h2 {
       font-size: 13px;
       font-weight: 800;
@@ -219,6 +223,31 @@
       color: var(--muted);
       font-size: 12px;
       white-space: nowrap;
+    }
+
+    .text-button {
+      border: 0;
+      border-radius: 999px;
+      background: #151311;
+      color: #fff;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      box-shadow: 0 10px 20px rgba(15, 13, 11, .12);
+      cursor: pointer;
+    }
+
+    .text-button.soft {
+      background: rgba(255,255,255,.82);
+      color: #27231f;
+      box-shadow: 0 8px 18px rgba(67, 48, 38, .08);
+    }
+
+    .text-button.danger {
+      background: #ead8d0;
+      color: #8a2e22;
+      box-shadow: none;
     }
 
     .recipe-grid {
@@ -239,16 +268,27 @@
       overflow: hidden;
       display: grid;
       align-content: space-between;
-      cursor: pointer;
     }
 
     .recipe-card:active {
       transform: scale(.985);
     }
 
+    .recipe-open {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      background: transparent;
+      padding: 14px;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      z-index: 1;
+    }
+
     .recipe-card h3 {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 126px;
       font-size: 12px;
       line-height: 1.18;
@@ -258,7 +298,7 @@
 
     .recipe-card p {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 105px;
       color: rgba(21, 19, 17, .62);
       font-size: 10.5px;
@@ -266,13 +306,13 @@
       font-weight: 700;
     }
 
-    .recipe-card:nth-child(5) {
+    .recipe-card:last-child:nth-child(odd) {
       grid-column: span 2;
       min-height: 82px;
     }
 
-    .recipe-card:nth-child(5) h3,
-    .recipe-card:nth-child(5) p {
+    .recipe-card:last-child:nth-child(odd) h3,
+    .recipe-card:last-child:nth-child(odd) p {
       max-width: 210px;
     }
 
@@ -298,6 +338,41 @@
       background: rgba(255,255,255,.28);
       color: rgba(21, 19, 17, .78);
       z-index: 2;
+    }
+
+    .card-actions,
+    .inline-actions {
+      display: flex;
+      gap: 6px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .card-actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .card-action {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.44);
+      color: #181511;
+      cursor: pointer;
+    }
+
+    .card-action svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .card-action.danger {
+      color: #8a2e22;
     }
 
     .feature-card {
@@ -562,6 +637,26 @@
       opacity: .72;
     }
 
+    .inline-actions {
+      justify-content: end;
+    }
+
+    .inline-actions button {
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      padding: 7px 10px;
+      color: #34302d;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .inline-actions button.danger {
+      color: #8a2e22;
+      background: #f3e0d9;
+    }
+
     .timeline {
       display: grid;
       gap: 10px;
@@ -774,6 +869,75 @@
       line-height: 1.52;
     }
 
+    .editor-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .form-row label {
+      color: #403a35;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .form-row input,
+    .form-row textarea,
+    .form-row select {
+      width: 100%;
+      border: 1px solid rgba(30,24,20,.08);
+      border-radius: 16px;
+      background: rgba(255,255,255,.86);
+      color: var(--ink);
+      padding: 12px;
+      outline: 0;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .form-row textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 7px;
+    }
+
+    .choice-grid label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.7);
+      padding: 10px;
+      color: #403a35;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      position: sticky;
+      bottom: 0;
+      padding-top: 4px;
+      background: linear-gradient(180deg, rgba(247,244,244,0), #f7f4f4 35%);
+    }
+
     .empty {
       padding: 38px 8px;
       color: var(--muted);
@@ -835,8 +999,11 @@
           </div>
 
           <div class="section-head">
-            <h2>추천 레시피</h2>
-            <small id="recipeCount">5개 메뉴</small>
+            <div>
+              <h2>추천 레시피</h2>
+              <small id="recipeCount">5개 메뉴</small>
+            </div>
+            <button class="text-button soft" type="button" onclick="openRecipeEditor()">레시피 추가</button>
           </div>
 
           <div id="recipeGrid" class="recipe-grid"></div>
@@ -862,8 +1029,11 @@
           <h1><span class="line">필요한 재료를</span><span class="line"><strong>가볍게</strong> 체크하세요.</span></h1>
 
           <div class="section-head">
-            <h2>분류별 요약</h2>
-            <small id="shoppingSummary">-</small>
+            <div>
+              <h2>분류별 요약</h2>
+              <small id="shoppingSummary">-</small>
+            </div>
+            <button class="text-button soft" type="button" onclick="openShoppingEditor()">재료 추가</button>
           </div>
 
           <div class="bubble-row" id="categoryBubbles"></div>
@@ -934,11 +1104,21 @@
           <div class="sheet-body" id="modalBody"></div>
         </div>
       </div>
+
+      <div id="editorModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+        <div class="sheet">
+          <div class="sheet-head">
+            <strong id="editorTitle">편집</strong>
+            <button type="button" onclick="closeEditor()">닫기</button>
+          </div>
+          <div class="sheet-body" id="editorBody"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    const recipes = [
+    const defaultRecipes = [
       {
         id: 'pork',
         title: '텍사스 바비큐 삼겹살',
@@ -1006,7 +1186,7 @@
       }
     ];
 
-    const shoppingItems = [
+    const defaultShoppingItems = [
       { id:'porkbelly', cat:'육류', name:'통삼겹살', qty:'1~1.2kg', use:'텍사스 바비큐 삼겹살', dishes:['pork'] },
       { id:'woosam', cat:'육류', name:'우삼겹', qty:'150g', use:'냉파스타 고명', dishes:['pasta'] },
       { id:'fish', cat:'해산물', name:'흰살생선', qty:'700g', use:'부야베스', dishes:['bouillabaisse'] },
@@ -1061,6 +1241,107 @@
     const state = JSON.parse(localStorage.getItem(stateKey) || '{}');
     let activeFilter = 'need';
     let recipeFilter = 'all';
+    let recipes = [];
+    let shoppingItems = [];
+    let db;
+
+    const dbName = 'dinnerPlannerContentDB';
+    const dbVersion = 1;
+    const recipeTints = ['#b8c1f4', '#ead875', '#cfe6df', '#ecdcd3', '#df846e', '#879567'];
+
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, dbVersion);
+        request.onupgradeneeded = event => {
+          const nextDb = event.target.result;
+          if (!nextDb.objectStoreNames.contains('recipes')) nextDb.createObjectStore('recipes', { keyPath: 'id' });
+          if (!nextDb.objectStoreNames.contains('shoppingItems')) nextDb.createObjectStore('shoppingItems', { keyPath: 'id' });
+          if (!nextDb.objectStoreNames.contains('meta')) nextDb.createObjectStore('meta', { keyPath: 'key' });
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function storeRequest(storeName, mode, operation) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, mode);
+        const store = tx.objectStore(storeName);
+        const request = operation(store);
+        let result;
+        request.onsuccess = () => { result = request.result; };
+        request.onerror = () => reject(request.error);
+        tx.oncomplete = () => resolve(result);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+    }
+
+    function getAllFromStore(storeName) {
+      return storeRequest(storeName, 'readonly', store => store.getAll());
+    }
+
+    function getFromStore(storeName, key) {
+      return storeRequest(storeName, 'readonly', store => store.get(key));
+    }
+
+    function putInStore(storeName, value) {
+      return storeRequest(storeName, 'readwrite', store => store.put(value));
+    }
+
+    function deleteFromStore(storeName, key) {
+      return storeRequest(storeName, 'readwrite', store => store.delete(key));
+    }
+
+    async function seedDatabaseIfNeeded() {
+      const seeded = await getFromStore('meta', 'seeded');
+      if (seeded?.value) return;
+      await Promise.all(defaultRecipes.map(recipe => putInStore('recipes', recipe)));
+      await Promise.all(defaultShoppingItems.map(item => putInStore('shoppingItems', item)));
+      await putInStore('meta', { key: 'seeded', value: true, seededAt: new Date().toISOString() });
+    }
+
+    async function loadContent() {
+      recipes = (await getAllFromStore('recipes')).sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ko'));
+      shoppingItems = (await getAllFromStore('shoppingItems')).sort((a, b) => (a.cat || '').localeCompare(b.cat || '', 'ko') || (a.name || '').localeCompare(b.name || '', 'ko'));
+      if (recipeFilter !== 'all' && !recipes.some(recipe => recipe.id === recipeFilter)) recipeFilter = 'all';
+    }
+
+    async function refreshContent() {
+      await loadContent();
+      renderRecipes();
+      renderShopping();
+      updateStats();
+    }
+
+    function createId(prefix) {
+      return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    function escapeHtml(value = '') {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function jsValue(value = '') {
+      return JSON.stringify(String(value)).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e');
+    }
+
+    function jsAttr(value = '') {
+      return escapeHtml(jsValue(value));
+    }
+
+    function listToText(list) {
+      return Array.isArray(list) ? list.join('\n') : '';
+    }
+
+    function textToList(value) {
+      return value.split('\n').map(item => item.trim()).filter(Boolean);
+    }
 
     const icons = {
       steam: '<svg class="card-art" viewBox="0 0 80 64"><path d="M13 52c12-15 28-15 40 0"/><path d="M24 16c-9 10 8 11-1 22"/><path d="M42 11c-11 12 10 13-1 27"/><path d="M59 18c-8 8 7 10-1 20"/></svg>',
@@ -1098,44 +1379,58 @@
     function renderRecipes() {
       const art = ['steam', 'pot', 'shrimp', 'noodle', 'sauce'];
       document.getElementById('recipeGrid').innerHTML = recipes.map((recipe, index) => `
-        <button class="recipe-card" type="button" onclick="openRecipe('${recipe.id}')" style="background:${recipe.tint}">
-          <h3>${recipe.title}</h3>
-          <p>${recipe.short}</p>
-          ${icons[art[index]]}
+        <article class="recipe-card" style="background:${escapeHtml(recipe.tint || recipeTints[index % recipeTints.length])}">
+          <button class="recipe-open" type="button" onclick="openRecipe(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 열기"></button>
+          <h3>${escapeHtml(recipe.title)}</h3>
+          <p>${escapeHtml(recipe.short)}</p>
+          ${icons[art[index % art.length]]}
+          <div class="card-actions">
+            <button class="card-action" type="button" onclick="openRecipeEditor(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 수정">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+            </button>
+            <button class="card-action danger" type="button" onclick="deleteRecipeItem(${jsAttr(recipe.id)})" aria-label="${escapeHtml(recipe.title)} 삭제">
+              <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg>
+            </button>
+          </div>
           <span class="open-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
-        </button>
+        </article>
       `).join('');
       document.getElementById('recipeCount').textContent = `${recipes.length}개 메뉴`;
     }
 
     function openRecipe(id) {
       const recipe = recipes.find(item => item.id === id);
+      if (!recipe) return;
       document.getElementById('modalTitle').textContent = recipe.title;
       document.getElementById('modalBody').innerHTML = `
         <article class="poster">
-          <div class="poster-top" style="background:${recipe.tint}">
-            <p class="label">${recipe.short}</p>
-            <h2>${recipe.title}</h2>
-            <p>${recipe.desc}</p>
+          <div class="poster-top" style="background:${escapeHtml(recipe.tint || '#ecdcd3')}">
+            <p class="label">${escapeHtml(recipe.short)}</p>
+            <h2>${escapeHtml(recipe.title)}</h2>
+            <p>${escapeHtml(recipe.desc)}</p>
             <div class="poster-meta">
-              <span>${recipe.serving}</span>
-              <span>${recipe.time}</span>
-              <span>난이도 ${recipe.level}</span>
+              <span>${escapeHtml(recipe.serving)}</span>
+              <span>${escapeHtml(recipe.time)}</span>
+              <span>난이도 ${escapeHtml(recipe.level)}</span>
             </div>
           </div>
           <div class="poster-body">
             <section class="poster-block">
               <h3>재료</h3>
-              <ul>${recipe.ingredients.map(item => `<li>${item}</li>`).join('')}</ul>
+              <ul>${(recipe.ingredients || []).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
             </section>
             <section class="poster-block">
               <h3>조리 방법</h3>
-              <ol>${recipe.steps.map(step => `<li>${step}</li>`).join('')}</ol>
+              <ol>${(recipe.steps || []).map(step => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
             </section>
             <section class="poster-block">
               <h3>핵심 포인트</h3>
-              <p>${recipe.key}</p>
+              <p>${escapeHtml(recipe.key)}</p>
             </section>
+            <div class="form-actions">
+              <button class="text-button soft" type="button" onclick="openRecipeEditor(${jsAttr(recipe.id)})">수정</button>
+              <button class="text-button danger" type="button" onclick="deleteRecipeItem(${jsAttr(recipe.id)})">삭제</button>
+            </div>
           </div>
         </article>
       `;
@@ -1146,6 +1441,197 @@
       document.getElementById('recipeModal').classList.remove('open');
     }
 
+    function closeEditor() {
+      document.getElementById('editorModal').classList.remove('open');
+    }
+
+    function openEditor(title, body) {
+      document.getElementById('editorTitle').textContent = title;
+      document.getElementById('editorBody').innerHTML = body;
+      document.getElementById('editorModal').classList.add('open');
+    }
+
+    function openRecipeEditor(id = '') {
+      const recipe = recipes.find(item => item.id === id) || {
+        id: '',
+        title: '',
+        short: '',
+        tint: recipeTints[recipes.length % recipeTints.length],
+        time: '',
+        serving: '',
+        level: '쉬움',
+        desc: '',
+        ingredients: [],
+        steps: [],
+        key: ''
+      };
+      const isEdit = Boolean(recipe.id);
+      openEditor(isEdit ? '레시피 수정' : '레시피 추가', `
+        <form class="editor-form" id="recipeEditorForm">
+          <div class="form-row">
+            <label for="recipeTitle">레시피 이름</label>
+            <input id="recipeTitle" name="title" required value="${escapeHtml(recipe.title)}" placeholder="예: 토마토 해산물 스튜" />
+          </div>
+          <div class="form-row">
+            <label for="recipeShort">짧은 설명</label>
+            <input id="recipeShort" name="short" value="${escapeHtml(recipe.short)}" placeholder="카드에 보일 한 줄 설명" />
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="recipeServing">분량</label>
+              <input id="recipeServing" name="serving" value="${escapeHtml(recipe.serving)}" placeholder="4인분" />
+            </div>
+            <div class="form-row">
+              <label for="recipeTime">시간</label>
+              <input id="recipeTime" name="time" value="${escapeHtml(recipe.time)}" placeholder="30분" />
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="recipeLevel">난이도</label>
+              <input id="recipeLevel" name="level" value="${escapeHtml(recipe.level)}" placeholder="쉬움" />
+            </div>
+            <div class="form-row">
+              <label for="recipeTint">카드 색상</label>
+              <input id="recipeTint" name="tint" type="color" value="${escapeHtml(recipe.tint || recipeTints[0])}" />
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="recipeDesc">상세 설명</label>
+            <textarea id="recipeDesc" name="desc" placeholder="레시피 소개">${escapeHtml(recipe.desc)}</textarea>
+          </div>
+          <div class="form-row">
+            <label for="recipeIngredients">재료 목록</label>
+            <textarea id="recipeIngredients" name="ingredients" placeholder="한 줄에 하나씩 입력">${escapeHtml(listToText(recipe.ingredients))}</textarea>
+          </div>
+          <div class="form-row">
+            <label for="recipeSteps">조리 방법</label>
+            <textarea id="recipeSteps" name="steps" placeholder="한 줄에 한 단계씩 입력">${escapeHtml(listToText(recipe.steps))}</textarea>
+          </div>
+          <div class="form-row">
+            <label for="recipeKey">핵심 포인트</label>
+            <textarea id="recipeKey" name="key" placeholder="성공 포인트나 주의사항">${escapeHtml(recipe.key)}</textarea>
+          </div>
+          <div class="form-actions">
+            <button class="text-button soft" type="button" onclick="closeEditor()">취소</button>
+            <button class="text-button" type="submit">저장</button>
+          </div>
+        </form>
+      `);
+      document.getElementById('recipeEditorForm').addEventListener('submit', event => saveRecipeEditor(event, recipe.id));
+    }
+
+    async function saveRecipeEditor(event, id = '') {
+      event.preventDefault();
+      const form = new FormData(event.target);
+      const recipe = {
+        id: id || createId('recipe'),
+        title: form.get('title').trim(),
+        short: form.get('short').trim(),
+        tint: form.get('tint') || recipeTints[0],
+        time: form.get('time').trim(),
+        serving: form.get('serving').trim(),
+        level: form.get('level').trim(),
+        desc: form.get('desc').trim(),
+        ingredients: textToList(form.get('ingredients')),
+        steps: textToList(form.get('steps')),
+        key: form.get('key').trim()
+      };
+      await putInStore('recipes', recipe);
+      closeEditor();
+      await refreshContent();
+    }
+
+    async function deleteRecipeItem(id) {
+      const recipe = recipes.find(item => item.id === id);
+      if (!recipe) return;
+      if (!confirm(`'${recipe.title}' 레시피를 삭제할까요? 연결된 장보기 항목은 삭제하지 않고 연결만 해제합니다.`)) return;
+      await deleteFromStore('recipes', id);
+      const linkedItems = shoppingItems.filter(item => (item.dishes || []).includes(id));
+      await Promise.all(linkedItems.map(item => putInStore('shoppingItems', {
+        ...item,
+        dishes: (item.dishes || []).filter(dishId => dishId !== id)
+      })));
+      closeRecipe();
+      closeEditor();
+      await refreshContent();
+    }
+
+    function openShoppingEditor(id = '') {
+      const item = shoppingItems.find(entry => entry.id === id) || {
+        id: '',
+        cat: '',
+        name: '',
+        qty: '',
+        use: '',
+        dishes: []
+      };
+      const recipeChoices = recipes.map(recipe => `
+        <label>
+          <input type="checkbox" name="dishes" value="${escapeHtml(recipe.id)}" ${(item.dishes || []).includes(recipe.id) ? 'checked' : ''} />
+          ${escapeHtml(recipe.title)}
+        </label>
+      `).join('') || '<p class="muted-note">먼저 레시피를 추가하면 연결할 수 있습니다.</p>';
+      openEditor(item.id ? '재료 수정' : '재료 추가', `
+        <form class="editor-form" id="shoppingEditorForm">
+          <div class="form-row">
+            <label for="itemName">재료 이름</label>
+            <input id="itemName" name="name" required value="${escapeHtml(item.name)}" placeholder="예: 새우" />
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="itemCat">분류</label>
+              <input id="itemCat" name="cat" required value="${escapeHtml(item.cat)}" placeholder="해산물" />
+            </div>
+            <div class="form-row">
+              <label for="itemQty">수량</label>
+              <input id="itemQty" name="qty" value="${escapeHtml(item.qty)}" placeholder="20마리" />
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="itemUse">사용처</label>
+            <input id="itemUse" name="use" value="${escapeHtml(item.use)}" placeholder="감바스, 부야베스" />
+          </div>
+          <div class="form-row">
+            <label>연결 레시피</label>
+            <div class="choice-grid">${recipeChoices}</div>
+          </div>
+          <div class="form-actions">
+            <button class="text-button soft" type="button" onclick="closeEditor()">취소</button>
+            <button class="text-button" type="submit">저장</button>
+          </div>
+        </form>
+      `);
+      document.getElementById('shoppingEditorForm').addEventListener('submit', event => saveShoppingEditor(event, item.id));
+    }
+
+    async function saveShoppingEditor(event, id = '') {
+      event.preventDefault();
+      const form = new FormData(event.target);
+      const item = {
+        id: id || createId('item'),
+        cat: form.get('cat').trim(),
+        name: form.get('name').trim(),
+        qty: form.get('qty').trim(),
+        use: form.get('use').trim(),
+        dishes: form.getAll('dishes')
+      };
+      await putInStore('shoppingItems', item);
+      closeEditor();
+      await refreshContent();
+    }
+
+    async function deleteShoppingItem(id) {
+      const item = shoppingItems.find(entry => entry.id === id);
+      if (!item) return;
+      if (!confirm(`'${item.name}' 항목을 삭제할까요?`)) return;
+      await deleteFromStore('shoppingItems', id);
+      delete state[id];
+      saveState();
+      closeEditor();
+      await refreshContent();
+    }
+
     function renderFilters() {
       const filters = [['all', '전체'], ['need', '필요'], ['owned', '집에 있음'], ['bought', '구매 완료']];
       document.getElementById('filters').innerHTML = filters.map(([id, label]) => `
@@ -1154,7 +1640,7 @@
 
       const recipeFilters = [['all', '전체 메뉴'], ...recipes.map(recipe => [recipe.id, recipe.title])];
       document.getElementById('recipeFilters').innerHTML = recipeFilters.map(([id, label]) => `
-        <button class="chip ${recipeFilter === id ? 'active' : ''}" type="button" onclick="recipeFilter='${id}'; renderShopping();">${label}</button>
+        <button class="chip ${recipeFilter === id ? 'active' : ''}" type="button" onclick="recipeFilter=${jsAttr(id)}; renderShopping();">${escapeHtml(label)}</button>
       `).join('');
     }
 
@@ -1164,7 +1650,7 @@
         const itemState = getItemState(item.id);
         const text = `${item.cat} ${item.name} ${item.qty} ${item.use}`.toLowerCase();
         if (query && !text.includes(query)) return false;
-        if (recipeFilter !== 'all' && !item.dishes.includes(recipeFilter)) return false;
+        if (recipeFilter !== 'all' && !(item.dishes || []).includes(recipeFilter)) return false;
         if (activeFilter === 'need' && (itemState.owned || itemState.bought)) return false;
         if (activeFilter === 'owned' && !itemState.owned) return false;
         if (activeFilter === 'bought' && !itemState.bought) return false;
@@ -1179,8 +1665,8 @@
         return map;
       }, {});
       document.getElementById('categoryBubbles').innerHTML = Object.entries(counts).map(([cat, count], index) => `
-        <button class="bubble" type="button" style="background:${colors[index % colors.length]}" onclick="document.getElementById('searchBox').value='${cat}'; renderShopping();">
-          ${cat}<br>${count}
+        <button class="bubble" type="button" style="background:${colors[index % colors.length]}" onclick="document.getElementById('searchBox').value=${jsAttr(cat)}; renderShopping();">
+          ${escapeHtml(cat)}<br>${count}
         </button>
       `).join('');
     }
@@ -1204,7 +1690,7 @@
       }
 
       list.innerHTML = categories.map(category => `
-        <div class="category-title">${category}</div>
+        <div class="category-title">${escapeHtml(category)}</div>
         <div class="list">
           ${groups[category].map(item => {
             const itemState = getItemState(item.id);
@@ -1212,14 +1698,18 @@
               <article class="shopping-item ${itemState.owned ? 'owned' : ''} ${itemState.bought ? 'bought' : ''}">
                 <div class="shopping-main">
                   <div>
-                    <strong>${item.name}</strong>
-                    <span>${item.use}</span>
+                    <strong>${escapeHtml(item.name)}</strong>
+                    <span>${escapeHtml(item.use)}</span>
                   </div>
-                  <div class="qty">${item.qty}</div>
+                  <div class="qty">${escapeHtml(item.qty)}</div>
                 </div>
                 <div class="checks">
-                  <label class="check"><input type="checkbox" ${itemState.owned ? 'checked' : ''} onchange="setItemState('${item.id}', 'owned', this.checked)">집에 있음</label>
-                  <label class="check"><input type="checkbox" ${itemState.bought ? 'checked' : ''} onchange="setItemState('${item.id}', 'bought', this.checked)">구매 완료</label>
+                  <label class="check"><input type="checkbox" ${itemState.owned ? 'checked' : ''} onchange="setItemState(${jsAttr(item.id)}, 'owned', this.checked)">집에 있음</label>
+                  <label class="check"><input type="checkbox" ${itemState.bought ? 'checked' : ''} onchange="setItemState(${jsAttr(item.id)}, 'bought', this.checked)">구매 완료</label>
+                </div>
+                <div class="inline-actions">
+                  <button type="button" onclick="openShoppingEditor(${jsAttr(item.id)})">수정</button>
+                  <button class="danger" type="button" onclick="deleteShoppingItem(${jsAttr(item.id)})">삭제</button>
                 </div>
               </article>
             `;
@@ -1268,12 +1758,26 @@
       if (event.target.id === 'recipeModal') closeRecipe();
     });
 
+    document.getElementById('editorModal').addEventListener('click', event => {
+      if (event.target.id === 'editorModal') closeEditor();
+    });
+
     document.getElementById('searchBox').addEventListener('input', renderShopping);
 
-    renderRecipes();
-    renderShopping();
-    renderTimeline();
-    updateStats();
+    async function initApp() {
+      db = await openDatabase();
+      await seedDatabaseIfNeeded();
+      await loadContent();
+      renderRecipes();
+      renderShopping();
+      renderTimeline();
+      updateStats();
+    }
+
+    initApp().catch(error => {
+      console.error(error);
+      document.getElementById('recipeGrid').innerHTML = '<div class="empty">데이터베이스를 열 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.</div>';
+    });
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
