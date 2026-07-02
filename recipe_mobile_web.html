@@ -1259,7 +1259,7 @@
               </div>
               <div class="ring" id="progressRing"><b id="progressRingText">0%</b></div>
             </div>
-            <button class="go-shop" type="button" data-view-jump="shopping">
+            <button id="goShopButton" class="go-shop" type="button" data-view-jump="shopping">
               <svg viewBox="0 0 24 24"><path d="M6 7h15l-2 9H8L6 7Z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
               장보기 이어서 체크
             </button>
@@ -2479,8 +2479,31 @@
       if (summaryEl) summaryEl.textContent = `필요 ${need} · 보유 ${owned} · 완료 ${bought}`;
       const numberEl = document.getElementById('progressNumber');
       if (numberEl) numberEl.textContent = pct;
+
+      const hasItems = relevant.length > 0;
       const copyEl = document.getElementById('progressCopy');
-      if (copyEl) copyEl.textContent = done ? `${done}개 재료가 처리됐고 ${need}개가 남았습니다.` : '체크한 재료가 아직 없습니다.';
+      if (copyEl) {
+        copyEl.textContent = !hasItems
+          ? '오늘의 레시피를 고르면 필요한 재료가 여기에 모입니다.'
+          : done === 0
+            ? `아직 체크한 재료가 없습니다. ${need}개 재료를 확인해 보세요.`
+            : need === 0
+              ? '필요한 재료를 모두 확인했습니다.'
+              : `${done}개 재료가 처리됐고 ${need}개가 남았습니다.`;
+      }
+
+      const goBtn = document.getElementById('goShopButton');
+      if (goBtn) {
+        const cartIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h15l-2 9H8L6 7Z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>';
+        const goLabel = !hasItems
+          ? '장보기 열기'
+          : done === 0
+            ? '장보기 시작하기'
+            : need === 0
+              ? '장보기 다시 보기'
+              : '장보기 이어서 체크';
+        goBtn.innerHTML = cartIcon + goLabel;
+      }
 
       const ring = document.getElementById('progressRing');
       if (ring) ring.style.setProperty('--ring', `${pct}%`);
